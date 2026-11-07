@@ -609,10 +609,14 @@ def get_db_status():
     except Exception:
         app_c = 0
 
+    cluster_host = "Unknown"
+    if db_manager.uri and "@" in db_manager.uri:
+        cluster_host = db_manager.uri.split("@")[-1].split("/")[0]
+
     return {
         "mode": db_manager.mode,
         "is_atlas": is_atlas,
-        "target_cluster": "kredocluster.lv1yjaf.mongodb.net",
+        "target_cluster": cluster_host,
         "database": "equibharat_db",
         "users_count": user_c,
         "applications_count": app_c,
