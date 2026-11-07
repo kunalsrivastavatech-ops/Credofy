@@ -47,7 +47,7 @@ class MongoDatabaseManager:
         
         # Initial connect attempt
         self.check_atlas_connection(timeout_ms=3000)
-        self._seed_if_empty(self.active_db)
+        self._seed_if_empty(self._mock_db)
 
     def check_atlas_connection(self, timeout_ms: int = 3000) -> bool:
         if not self.uri or "mongodb" not in self.uri:
@@ -74,12 +74,13 @@ class MongoDatabaseManager:
             self._sync_to_atlas()
             return True
         except Exception as e:
+            print("Atlas connect notice:", type(e).__name__, e)
             self._is_atlas = False
             return False
 
     def _sync_to_atlas(self):
         """Only syncs user logins to live Atlas to prevent cluster storage bloat."""
-        if not self._is_atlas or not self._atlas_db:
+        if not self._is_atlas or self._atlas_db is None:
             return
         try:
             mock_users = list(self._mock_db["users"].find({}))
@@ -93,7 +94,7 @@ class MongoDatabaseManager:
 
     def _seed_if_empty(self, target_db):
         """Seeds sample loan data into in-memory mock db only (never into live Atlas)."""
-        if self._is_atlas and target_db == self._atlas_db:
+        if self._is_atlas and target_db is self._atlas_db:
             return
         try:
             if target_db["applications"].count_documents({}) == 0:
@@ -118,7 +119,7 @@ class MongoDatabaseManager:
             self._last_atlas_attempt = now
             self.check_atlas_connection(timeout_ms=2500)
         
-        return self._atlas_db if self._is_atlas else self._mock_db
+        return self._atlas_db if (self._is_atlas and self._atlas_db is not None) else self._mock_db
 
     @property
     def mode(self) -> str:
