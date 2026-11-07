@@ -68,10 +68,9 @@ class MongoDatabaseManager:
             self._atlas_db = client["equibharat_db"]
             self._is_atlas = True
             safe_uri = self.uri.split("@")[-1] if "@" in self.uri else self.uri
-            print(f"✓ Connected to Live MongoDB Atlas: {safe_uri}")
+            print(f"✓ Connected to Live MongoDB Atlas (Users-Only Persistence): {safe_uri}")
             
-            # Seed and sync
-            self._seed_if_empty(self._atlas_db)
+            # Sync user profiles to Atlas (applications are kept in-memory to preserve storage quota)
             self._sync_to_atlas()
             return True
         except Exception as e:
@@ -79,25 +78,23 @@ class MongoDatabaseManager:
             return False
 
     def _sync_to_atlas(self):
-        """Syncs all mock collections into live Atlas upon connection."""
+        """Only syncs user logins to live Atlas to prevent cluster storage bloat."""
         if not self._is_atlas or not self._atlas_db:
             return
         try:
-            for col_name in ["users", "applications", "scanned_documents", "bank_leads", "audit_logs"]:
-                mock_docs = list(self._mock_db[col_name].find({}))
-                for d in mock_docs:
-                    doc_copy = dict(d)
-                    doc_copy.pop("_id", None)
-                    if "email" in doc_copy and col_name == "users":
-                        self._atlas_db[col_name].replace_one({"email": doc_copy["email"]}, doc_copy, upsert=True)
-                    elif "application_id" in doc_copy:
-                        self._atlas_db[col_name].replace_one({"application_id": doc_copy["application_id"]}, doc_copy, upsert=True)
-                    else:
-                        self._atlas_db[col_name].insert_one(doc_copy)
+            mock_users = list(self._mock_db["users"].find({}))
+            for d in mock_users:
+                doc_copy = dict(d)
+                doc_copy.pop("_id", None)
+                if "email" in doc_copy:
+                    self._atlas_db["users"].replace_one({"email": doc_copy["email"]}, doc_copy, upsert=True)
         except Exception as e:
-            print(f"Note: Atlas sync warning: {e}")
+            print(f"Note: Atlas user sync warning: {e}")
 
     def _seed_if_empty(self, target_db):
+        """Seeds sample loan data into in-memory mock db only (never into live Atlas)."""
+        if self._is_atlas and target_db == self._atlas_db:
+            return
         try:
             if target_db["applications"].count_documents({}) == 0:
                 csv_path = os.path.join(BASE_DIR, "data", "indian_loan_data.csv")
@@ -109,7 +106,7 @@ class MongoDatabaseManager:
                         r["created_at"] = datetime.utcnow().isoformat()
                         r["is_seed"] = True
                     target_db["applications"].insert_many(records)
-                    print(f"✓ Seeded database with {len(records)} credit applications.")
+                    print(f"✓ Seeded in-memory engine with {len(records)} credit applications.")
         except Exception:
             pass
 
@@ -127,7 +124,7 @@ class MongoDatabaseManager:
     def mode(self) -> str:
         if self._is_atlas:
             safe_uri = self.uri.split("@")[-1] if "@" in self.uri else self.uri
-            return f"Live MongoDB Atlas ({safe_uri})"
+            return f"Live MongoDB Atlas ({safe_uri}) [Storage Guard: Users Only]"
         return "Embedded MongoDB (In-Memory Fallback - Offline Sync Ready)"
 
 db_manager = MongoDatabaseManager(MONGO_URI)
@@ -137,7 +134,11 @@ class CollectionProxy:
         self._col_name = col_name
     
     def __getattr__(self, item):
-        return getattr(db_manager.active_db[self._col_name], item)
+        # ONLY user accounts/logins persist to live Atlas to prevent storage quota exhaustion
+        if self._col_name == "users":
+            return getattr(db_manager.active_db[self._col_name], item)
+        # Applications, document scans, leads and audits use in-memory fast storage
+        return getattr(db_manager._mock_db[self._col_name], item)
 
 applications_col = CollectionProxy("applications")
 fairness_col = CollectionProxy("fairness_audits")
