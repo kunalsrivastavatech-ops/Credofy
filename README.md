@@ -1,6 +1,6 @@
 # EquiBharat (इक्वि-भारत) ⚖️
 ### Fair & Explainable Credit Underwriting Platform for Bharat
-**DEVIATHON 2.0 | GLA University, Mathura • Problem ID: DEV-P02 • Theme: MISSION BHARAT**
+
 
 ---
 
