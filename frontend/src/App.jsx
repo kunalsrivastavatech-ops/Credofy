@@ -2498,24 +2498,24 @@ export default function App() {
 
   // Global Institutional Footer: Made with ❤️ by Kunal Srivastava
   const renderFooter = () => (
-    <footer className="w-full py-5 border-t border-slate-800/80 bg-[#070B14]/95 text-slate-400 text-xs mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+    <footer className="w-full py-5 border-t border-slate-800/80 bg-[#060911]/95 text-slate-300 text-xs mt-auto relative z-30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left pr-4 sm:pr-48 lg:pr-52">
         <div className="flex items-center gap-2.5">
-          <EquiBharatLogo className="w-5 h-5 flex-shrink-0" />
-          <span className="font-bold text-white text-xs sm:text-sm">
+          <EquiBharatLogo className="w-6 h-6 flex-shrink-0" />
+          <span className="font-extrabold text-white text-sm tracking-tight">
             Equi<span className="text-amber-400">Bharat</span><span className="text-amber-400">.ai</span>
           </span>
-          <span className="text-slate-700 hidden md:inline">•</span>
-          <span className="text-[11px] text-slate-400 hidden md:inline">
+          <span className="text-slate-700 hidden lg:inline">|</span>
+          <span className="text-xs text-slate-400 hidden lg:inline">
             {isHi ? "निष्पक्ष एवं पारदर्शी डिजिटल ऋण अवसंरचना" : "Fair & Transparent Digital Credit Infrastructure"}
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-slate-900/90 border border-amber-500/30 px-4 py-1.5 rounded-full shadow-inner">
-          <span className="text-xs text-slate-300">Made with</span>
-          <span className="text-rose-500 animate-pulse text-sm select-none">❤️</span>
-          <span className="text-xs text-slate-300">by</span>
-          <span className="text-xs font-black text-amber-400 tracking-wide">Kunal Srivastava</span>
+        <div className="flex items-center gap-2 bg-gradient-to-r from-amber-500/10 via-slate-900 to-amber-500/10 border border-amber-500/40 px-5 py-1.5 rounded-full shadow-lg shadow-amber-500/5">
+          <span className="text-xs font-semibold text-slate-300">Made with</span>
+          <span className="text-rose-500 animate-pulse text-base leading-none select-none">❤️</span>
+          <span className="text-xs font-semibold text-slate-300">by</span>
+          <span className="text-xs font-black text-amber-400 tracking-wider">Kunal Srivastava</span>
         </div>
 
         <div className="text-[11px] text-slate-500">
