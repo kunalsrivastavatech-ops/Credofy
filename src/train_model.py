@@ -234,6 +234,7 @@ def train_and_export():
         json.dump(accuracy_report, f, indent=2)
         
     joblib.dump(model, os.path.join(MODELS_DIR, 'kredo_model.pkl'))
+    joblib.dump(model, os.path.join(MODELS_DIR, 'equibharat_model.pkl'))
     joblib.dump(preprocessor, os.path.join(MODELS_DIR, 'preprocessor.pkl'))
     joblib.dump(explainer, os.path.join(MODELS_DIR, 'explainer.pkl'))
     joblib.dump(all_feature_names, os.path.join(MODELS_DIR, 'feature_names.pkl'))

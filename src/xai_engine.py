@@ -12,10 +12,23 @@ class EquiBharatExplainabilityEngine:
         if model_dir is None:
             model_dir = MODELS_DIR
         model_file = "equibharat_model.pkl" if os.path.exists(os.path.join(model_dir, "equibharat_model.pkl")) else "kredo_model.pkl"
-        self.model = joblib.load(os.path.join(model_dir, model_file))
-        self.preprocessor = joblib.load(os.path.join(model_dir, "preprocessor.pkl"))
-        self.explainer = joblib.load(os.path.join(model_dir, "explainer.pkl"))
-        self.feature_names = joblib.load(os.path.join(model_dir, "feature_names.pkl"))
+        try:
+            self.model = joblib.load(os.path.join(model_dir, model_file))
+            self.preprocessor = joblib.load(os.path.join(model_dir, "preprocessor.pkl"))
+            self.explainer = joblib.load(os.path.join(model_dir, "explainer.pkl"))
+            self.feature_names = joblib.load(os.path.join(model_dir, "feature_names.pkl"))
+        except Exception as e:
+            print(f"Notice: Pickled model load warning ({e}). Auto-retraining fresh model in current Python environment...")
+            try:
+                from train_model import train_and_export
+                train_and_export()
+                self.model = joblib.load(os.path.join(model_dir, model_file))
+                self.preprocessor = joblib.load(os.path.join(model_dir, "preprocessor.pkl"))
+                self.explainer = joblib.load(os.path.join(model_dir, "explainer.pkl"))
+                self.feature_names = joblib.load(os.path.join(model_dir, "feature_names.pkl"))
+            except Exception as e2:
+                print(f"Error during runtime fallback training: {e2}")
+                raise e
         
         # Friendly Indian Terminology mappings
         self.feature_labels_en = {
