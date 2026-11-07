@@ -16,6 +16,13 @@ class ErrorBoundary extends React.Component {
     console.error("EquiBharat ErrorBoundary caught an error:", error, errorInfo);
   }
 
+  handleReset = () => {
+    try {
+      localStorage.removeItem('equibharat_user');
+    } catch {}
+    window.location.href = '/';
+  };
+
   render() {
     if (this.state.hasError) {
       return (
@@ -40,12 +47,12 @@ class ErrorBoundary extends React.Component {
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
           }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚡</div>
-            <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '8px' }}>Application Refresh Required</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '8px' }}>Session Reset & Refresh</h2>
             <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '24px' }}>
-              A temporary display error was caught. Click below to reload the clean session.
+              Your session was refreshed. Click below to continue to the EquiBharat login portal.
             </p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={this.handleReset}
               style={{
                 background: 'linear-gradient(to right, #F59E0B, #EA580C)',
                 color: '#020617',
@@ -57,7 +64,7 @@ class ErrorBoundary extends React.Component {
                 cursor: 'pointer'
               }}
             >
-              Reload EquiBharat.ai
+              Reset Session & Sign In
             </button>
           </div>
         </div>

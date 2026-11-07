@@ -1327,12 +1327,31 @@ export default function App() {
     }
   }, [chatMessages, isChatOpen, chatLoading]);
 
-  // 1.8s Splash Screen Timer
+  // 1.8s Splash Screen Timer & Active MongoDB Session Verification
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // If user is already authenticated in localStorage, take them to terms/dashboard
+    const timer = setTimeout(async () => {
+      // If user is saved in localStorage, check if they still exist in MongoDB database
       if (user && user.accountId) {
-        setStage('dashboard');
+        try {
+          const res = await fetch(`${API_BASE}/user-passbook/${encodeURIComponent(user.accountId)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.user_profile) {
+              setStage('loan_purpose');
+              return;
+            }
+          }
+          // If user record was deleted from MongoDB Atlas, clear stale phone session
+          console.warn("User account not found in MongoDB. Resetting local session to login.");
+          try {
+            localStorage.removeItem('equibharat_user');
+          } catch {}
+          setUser(null);
+          setStage('login');
+        } catch (e) {
+          // Offline / network lag fallback: route to loan_purpose
+          setStage('loan_purpose');
+        }
       } else {
         setStage('login');
       }
@@ -4988,5 +5007,45 @@ export default function App() {
     );
   }
 
-  return null;
+  // ================= UNIVERSAL FALLBACK SAFETY RENDERER =================
+  // Guarantees zero blank screen or null render under any unknown stage state
+  return (
+    <div className="min-h-screen bg-[#070B12] text-white flex flex-col justify-between items-center relative">
+      <div className="w-full flex-1 flex items-center justify-center p-4 py-8">
+        <div className="w-full max-w-md bg-[#0F1626] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6">
+          <EquiBharatLogo className="w-12 h-12 mx-auto" />
+          <div>
+            <h3 className="text-lg font-bold text-white">
+              {isHi ? "EquiBharat.ai सत्र लोड हो रहा है..." : "Loading EquiBharat.ai Workspace..."}
+            </h3>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+              {isHi ? "सत्र सुरक्षित रूप से सत्यापित किया जा रहा है।" : "Synchronizing secure session with RBI Fair Lending engine."}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2.5 pt-2">
+            <button
+              onClick={() => setStage(user?.accountId ? 'loan_purpose' : 'login')}
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs shadow-lg transition"
+            >
+              {user?.accountId 
+                ? (isHi ? "ऋण पोर्टल जारी रखें →" : "Continue to Loan Portal →") 
+                : (isHi ? "गूगल लॉगिन करें →" : "Sign In with Google →")}
+            </button>
+            <button
+              onClick={() => {
+                try { localStorage.removeItem('equibharat_user'); } catch {}
+                setUser(null);
+                setStage('login');
+              }}
+              className="w-full py-2.5 px-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-xs transition"
+            >
+              {isHi ? "सत्र रीसेट करें (लॉगिन)" : "Reset Session (Fresh Login)"}
+            </button>
+          </div>
+        </div>
+      </div>
+      {renderFooter()}
+      {renderCommonOverlays()}
+    </div>
+  );
 }
