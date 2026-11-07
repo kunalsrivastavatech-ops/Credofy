@@ -2496,6 +2496,35 @@ export default function App() {
     </div>
   );
 
+  // Global Institutional Footer: Made with ❤️ by Kunal Srivastava
+  const renderFooter = () => (
+    <footer className="w-full py-5 border-t border-slate-800/80 bg-[#070B14]/95 text-slate-400 text-xs mt-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+        <div className="flex items-center gap-2.5">
+          <EquiBharatLogo className="w-5 h-5 flex-shrink-0" />
+          <span className="font-bold text-white text-xs sm:text-sm">
+            Equi<span className="text-amber-400">Bharat</span><span className="text-amber-400">.ai</span>
+          </span>
+          <span className="text-slate-700 hidden md:inline">•</span>
+          <span className="text-[11px] text-slate-400 hidden md:inline">
+            {isHi ? "निष्पक्ष एवं पारदर्शी डिजिटल ऋण अवसंरचना" : "Fair & Transparent Digital Credit Infrastructure"}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 bg-slate-900/90 border border-amber-500/30 px-4 py-1.5 rounded-full shadow-inner">
+          <span className="text-xs text-slate-300">Made with</span>
+          <span className="text-rose-500 animate-pulse text-sm select-none">❤️</span>
+          <span className="text-xs text-slate-300">by</span>
+          <span className="text-xs font-black text-amber-400 tracking-wide">Kunal Srivastava</span>
+        </div>
+
+        <div className="text-[11px] text-slate-500">
+          © 2026 EquiBharat.ai • 100% RBI & Sovereign Bharat Compliant
+        </div>
+      </div>
+    </footer>
+  );
+
   // Common Citizen Overlays: Chatbot Copilot + Helplines Modal + Passbook Slip Modal + Fairness Audit
   const renderCommonOverlays = () => (
     <>
@@ -2535,69 +2564,72 @@ export default function App() {
   // ================= STAGE 2: GOOGLE AUTHENTICATION SCREEN =================
   if (stage === 'login') {
     return (
-      <div className="min-h-screen bg-[#070B12] flex flex-col items-center justify-center p-4 relative">
-        <div className="w-full max-w-md bg-[#0F1626] border border-slate-800 rounded-3xl p-8 shadow-2xl relative z-10 text-center">
-          <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/80">
-            <div className="flex items-center gap-2.5">
-              <EquiBharatLogo className="w-8 h-8 flex-shrink-0" />
-              <span className="font-black text-white text-base tracking-tight">Equi<span className="text-amber-400">Bharat</span><span className="text-amber-400">.ai</span></span>
-            </div>
-            <button
-              onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
-              className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/30"
-            >
-              {isHi ? "English" : "हिन्दी"}
-            </button>
-          </div>
-
-          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-3 shadow-inner">
-            <svg className="w-7 h-7" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-            </svg>
-          </div>
-
-          <h2 className="text-xl font-black text-white mb-1">
-            {isHi ? "Google खाते से साइन इन करें" : "Sign in with Google"}
-          </h2>
-          <p className="text-xs text-slate-400 mb-6">
-            {isHi ? "सुरक्षित एवं गोपनीय ऋण मूल्यांकन के लिए" : "Institutional credit evaluation & bank verification"}
-          </p>
-
-          {/* Official Google Identity Services OAuth 2.0 Button */}
-          <div className="my-8 flex flex-col items-center justify-center min-h-[52px]">
-            <div id="google-signin-btn-container" className="flex justify-center min-h-[44px] w-full">
+      <div className="min-h-screen bg-[#070B12] flex flex-col justify-between items-center relative">
+        <div className="w-full flex-1 flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[#0F1626] border border-slate-800 rounded-3xl p-8 shadow-2xl relative z-10 text-center">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/80">
+              <div className="flex items-center gap-2.5">
+                <EquiBharatLogo className="w-8 h-8 flex-shrink-0" />
+                <span className="font-black text-white text-base tracking-tight">Equi<span className="text-amber-400">Bharat</span><span className="text-amber-400">.ai</span></span>
+              </div>
               <button
-                onClick={() => {
-                  handleGoogleLogin();
-                }}
-                disabled={loading}
-                className="py-3 px-6 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-full flex items-center justify-center gap-3 shadow-xl transition transform active:scale-[0.99] text-sm"
+                onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
+                className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/30"
               >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-                </svg>
-                <span>Continue with Google</span>
+                {isHi ? "English" : "हिन्दी"}
               </button>
             </div>
-            {loading && (
-              <div className="flex items-center gap-2 mt-4 text-xs text-amber-400 font-medium">
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>{isHi ? "सुरक्षित लॉगिन सत्यापित किया जा रहा है..." : "Authenticating and securing session..."}</span>
-              </div>
-            )}
-          </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>{isHi ? "256-बिट बैंक-ग्रेड एन्क्रिप्शन एवं आरबीआई गोपनीयता अनुपालन" : "Protected by 256-Bit Bank Encryption & RBI Data Privacy"}</span>
+            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-3 shadow-inner">
+              <svg className="w-7 h-7" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+              </svg>
+            </div>
+
+            <h2 className="text-xl font-black text-white mb-1">
+              {isHi ? "Google खाते से साइन इन करें" : "Sign in with Google"}
+            </h2>
+            <p className="text-xs text-slate-400 mb-6">
+              {isHi ? "सुरक्षित एवं गोपनीय ऋण मूल्यांकन के लिए" : "Institutional credit evaluation & bank verification"}
+            </p>
+
+            {/* Official Google Identity Services OAuth 2.0 Button */}
+            <div className="my-8 flex flex-col items-center justify-center min-h-[52px]">
+              <div id="google-signin-btn-container" className="flex justify-center min-h-[44px] w-full">
+                <button
+                  onClick={() => {
+                    handleGoogleLogin();
+                  }}
+                  disabled={loading}
+                  className="py-3 px-6 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-full flex items-center justify-center gap-3 shadow-xl transition transform active:scale-[0.99] text-sm"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                  </svg>
+                  <span>Continue with Google</span>
+                </button>
+              </div>
+              {loading && (
+                <div className="flex items-center gap-2 mt-4 text-xs text-amber-400 font-medium">
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>{isHi ? "सुरक्षित लॉगिन सत्यापित किया जा रहा है..." : "Authenticating and securing session..."}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>{isHi ? "256-बिट बैंक-ग्रेड एन्क्रिप्शन एवं आरबीआई गोपनीयता अनुपालन" : "Protected by 256-Bit Bank Encryption & RBI Data Privacy"}</span>
+            </div>
           </div>
         </div>
+        {renderFooter()}
         {renderCommonOverlays()}
       </div>
     );
@@ -2606,133 +2638,136 @@ export default function App() {
   // ================= STAGE 3: TERMS & CONDITIONS (RBI REGULATORY CONSENT - UNIVERSAL MINIMALIST) =================
   if (stage === 'terms') {
     return (
-      <div className="min-h-screen bg-[#070B12] text-white flex flex-col items-center justify-center p-4 py-8">
-        <div className="w-full max-w-xl bg-[#0F1626] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-          {/* Top Bar */}
-          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-            {renderUserProfileHeader()}
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-lg">
-                Step 1 of 3: Consent
+      <div className="min-h-screen bg-[#070B12] text-white flex flex-col justify-between items-center relative">
+        <div className="w-full flex-1 flex items-center justify-center p-4 py-8">
+          <div className="w-full max-w-xl bg-[#0F1626] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+            {/* Top Bar */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              {renderUserProfileHeader()}
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-lg">
+                  Step 1 of 3: Consent
+                </span>
+                <button
+                  onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
+                  className="text-xs font-bold text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 transition"
+                >
+                  {isHi ? "English" : "हिन्दी"}
+                </button>
+              </div>
+            </div>
+
+            {/* Calm Welcome & Reassurance */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold text-amber-400">
+                  {isHi ? "नमस्ते" : "Good to have you here"}
+                </span>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold">
+                  <ShieldCheck className="w-3 h-3" />
+                  <span>{isHi ? "आरबीआई प्रमाणित" : "RBI Certified"}</span>
+                </div>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                {isHi ? `स्वागत है, ${user.name} 👋` : `Welcome, ${user.name} 👋`}
+              </h2>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                {isHi 
+                  ? "ऋण सुविधा चुनने से पूर्व कृपया EquiBharat की निष्पक्ष मूल्यांकन एवं सिबिल सुरक्षा नीति की समीक्षा करें।" 
+                  : "Safe, dignified loan underwriting with zero CIBIL score impact and zero agent commissions."}
+              </p>
+            </div>
+
+            {/* Trust Pill */}
+            <div className="bg-slate-900/90 border border-slate-800 px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-xs">
+              <span className="text-slate-300 font-medium flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span>{isHi ? "आरबीआई 2022 डिजिटल लेंडिंग अनुपालन" : "RBI Fair Lending 2022 Compliant"}</span>
               </span>
+              <span className="text-[11px] text-emerald-400 font-mono font-bold">
+                {isHi ? "0 सिबिल प्रभाव" : "0 Bureau Impact"}
+              </span>
+            </div>
+
+            {/* 3 Clean Trust Rows (Zero Clutter) */}
+            <div className="space-y-3">
+              <div className="bg-slate-900/70 border border-slate-800/80 p-3.5 rounded-2xl flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center flex-shrink-0 text-sm mt-0.5">
+                  ⚖️
+                </div>
+                <div className="space-y-0.5 flex-1">
+                  <h4 className="text-xs font-bold text-white">
+                    {isHi ? "1. निष्पक्ष एवं पारदर्शी एआई (Fair Lending)" : "1. 100% Fair & Explainable AI"}
+                  </h4>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    {isHi 
+                      ? "लिंग या क्षेत्र के आधार पर कोई भेदभाव नहीं। हर निर्णय का पूरा कारण गणितीय SHAP मूल्यों सहित हिंदी व अंग्रेज़ी में उपलब्ध है।" 
+                      : "Zero demographic bias. Every score is mathematically calculated with full SHAP transparency in English and Hindi."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-slate-900/70 border border-slate-800/80 p-3.5 rounded-2xl flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center flex-shrink-0 text-sm mt-0.5">
+                  🔒
+                </div>
+                <div className="space-y-0.5 flex-1">
+                  <h4 className="text-xs font-bold text-white">
+                    {isHi ? "2. सिबिल स्कोर पूर्ण सुरक्षित (Soft Check)" : "2. Zero CIBIL Score Impact (Soft Check)"}
+                  </h4>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    {isHi 
+                      ? "EquiBharat पर अपनी पात्रता जांचने से आपका आधिकारिक सिबिल/एक्सपीरियन स्कोर 1 अंक भी कम नहीं होता।" 
+                      : "Pre-qualification performs a soft check only. It will never deduct points or flag your official bureau report."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-slate-900/70 border border-slate-800/80 p-3.5 rounded-2xl flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center flex-shrink-0 text-sm mt-0.5">
+                  🏛️
+                </div>
+                <div className="space-y-0.5 flex-1">
+                  <h4 className="text-xs font-bold text-white">
+                    {isHi ? "3. सीधे बैंक एवं सरकारी डेस्क (बिना दलाल)" : "3. Direct Bank & Government Desks"}
+                  </h4>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    {isHi 
+                      ? "कोई बिचौलिया या हिडन शुल्क नहीं। वित्तीय दस्तावेज़ 256-बिट एन्क्रिप्टेड रहते हैं और कभी तीसरे पक्ष को नहीं बेचे जाते।" 
+                      : "Direct connection to official PSU/private bank desks and central subsidy portals. Zero third-party broker fees."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Minimalist Agreement & Proceed */}
+            <div className="pt-3 border-t border-slate-800 space-y-4">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-950"
+                />
+                <span className="text-xs text-slate-300 leading-snug select-none group-hover:text-white transition">
+                  {isHi 
+                    ? "मैंने EquiBharat.ai की निष्पक्ष ऋण नीति एवं सॉफ्ट क्रेडिट जांच सहमति को समझ लिया है और मैं सहमत हूँ।" 
+                    : "I agree to EquiBharat.ai Terms of Service, RBI Fair Lending Policy, and Soft Credit Data Consent."}
+                </span>
+              </label>
+
               <button
-                onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
-                className="text-xs font-bold text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 transition"
+                onClick={() => setStage('loan_purpose')}
+                disabled={!agreedToTerms}
+                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed transition transform active:scale-[0.99]"
               >
-                {isHi ? "English" : "हिन्दी"}
+                <span>{isHi ? "शर्तें स्वीकार करें और ऋण चुनें →" : "Accept & Choose Loan Facility →"}</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
-
-          {/* Calm Welcome & Reassurance */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-amber-400">
-                {isHi ? "नमस्ते" : "Good to have you here"}
-              </span>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold">
-                <ShieldCheck className="w-3 h-3" />
-                <span>{isHi ? "आरबीआई प्रमाणित" : "RBI Certified"}</span>
-              </div>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              {isHi ? `स्वागत है, ${user.name} 👋` : `Welcome, ${user.name} 👋`}
-            </h2>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              {isHi 
-                ? "ऋण सुविधा चुनने से पूर्व कृपया EquiBharat की निष्पक्ष मूल्यांकन एवं सिबिल सुरक्षा नीति की समीक्षा करें।" 
-                : "Safe, dignified loan underwriting with zero CIBIL score impact and zero agent commissions."}
-            </p>
-          </div>
-
-          {/* Trust Pill */}
-          <div className="bg-slate-900/90 border border-slate-800 px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-xs">
-            <span className="text-slate-300 font-medium flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-400" />
-              <span>{isHi ? "आरबीआई 2022 डिजिटल लेंडिंग अनुपालन" : "RBI Fair Lending 2022 Compliant"}</span>
-            </span>
-            <span className="text-[11px] text-emerald-400 font-mono font-bold">
-              {isHi ? "0 सिबिल प्रभाव" : "0 Bureau Impact"}
-            </span>
-          </div>
-
-          {/* 3 Clean Trust Rows (Zero Clutter) */}
-          <div className="space-y-3">
-            <div className="bg-slate-900/70 border border-slate-800/80 p-3.5 rounded-2xl flex items-start gap-3">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center flex-shrink-0 text-sm mt-0.5">
-                ⚖️
-              </div>
-              <div className="space-y-0.5 flex-1">
-                <h4 className="text-xs font-bold text-white">
-                  {isHi ? "1. निष्पक्ष एवं पारदर्शी एआई (Fair Lending)" : "1. 100% Fair & Explainable AI"}
-                </h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  {isHi 
-                    ? "लिंग या क्षेत्र के आधार पर कोई भेदभाव नहीं। हर निर्णय का पूरा कारण गणितीय SHAP मूल्यों सहित हिंदी व अंग्रेज़ी में उपलब्ध है।" 
-                    : "Zero demographic bias. Every score is mathematically calculated with full SHAP transparency in English and Hindi."}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-slate-900/70 border border-slate-800/80 p-3.5 rounded-2xl flex items-start gap-3">
-              <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center flex-shrink-0 text-sm mt-0.5">
-                🔒
-              </div>
-              <div className="space-y-0.5 flex-1">
-                <h4 className="text-xs font-bold text-white">
-                  {isHi ? "2. सिबिल स्कोर पूर्ण सुरक्षित (Soft Check)" : "2. Zero CIBIL Score Impact (Soft Check)"}
-                </h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  {isHi 
-                    ? "EquiBharat पर अपनी पात्रता जांचने से आपका आधिकारिक सिबिल/एक्सपीरियन स्कोर 1 अंक भी कम नहीं होता।" 
-                    : "Pre-qualification performs a soft check only. It will never deduct points or flag your official bureau report."}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-slate-900/70 border border-slate-800/80 p-3.5 rounded-2xl flex items-start gap-3">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center flex-shrink-0 text-sm mt-0.5">
-                🏛️
-              </div>
-              <div className="space-y-0.5 flex-1">
-                <h4 className="text-xs font-bold text-white">
-                  {isHi ? "3. सीधे बैंक एवं सरकारी डेस्क (बिना दलाल)" : "3. Direct Bank & Government Desks"}
-                </h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  {isHi 
-                    ? "कोई बिचौलिया या हिडन शुल्क नहीं। वित्तीय दस्तावेज़ 256-बिट एन्क्रिप्टेड रहते हैं और कभी तीसरे पक्ष को नहीं बेचे जाते।" 
-                    : "Direct connection to official PSU/private bank desks and central subsidy portals. Zero third-party broker fees."}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Minimalist Agreement & Proceed */}
-          <div className="pt-3 border-t border-slate-800 space-y-4">
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-950"
-              />
-              <span className="text-xs text-slate-300 leading-snug select-none group-hover:text-white transition">
-                {isHi 
-                  ? "मैंने EquiBharat.ai की निष्पक्ष ऋण नीति एवं सॉफ्ट क्रेडिट जांच सहमति को समझ लिया है और मैं सहमत हूँ।" 
-                  : "I agree to EquiBharat.ai Terms of Service, RBI Fair Lending Policy, and Soft Credit Data Consent."}
-              </span>
-            </label>
-
-            <button
-              onClick={() => setStage('loan_purpose')}
-              disabled={!agreedToTerms}
-              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed transition transform active:scale-[0.99]"
-            >
-              <span>{isHi ? "शर्तें स्वीकार करें और ऋण चुनें →" : "Accept & Choose Loan Facility →"}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
+        {renderFooter()}
         {renderCommonOverlays()}
       </div>
     );
@@ -2741,8 +2776,9 @@ export default function App() {
   // ================= STAGE 4: LOAN PURPOSE SELECTION (UNIVERSAL MINIMALIST) =================
   if (stage === 'loan_purpose') {
     return (
-      <div className="min-h-screen bg-[#070B12] text-white flex flex-col items-center justify-center p-4 py-8">
-        <div className="w-full max-w-xl sm:max-w-2xl bg-[#0F1626] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="min-h-screen bg-[#070B12] text-white flex flex-col justify-between items-center relative">
+        <div className="w-full flex-1 flex items-center justify-center p-4 py-8">
+          <div className="w-full max-w-xl sm:max-w-2xl bg-[#0F1626] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
             <div className="flex items-center gap-2.5">
@@ -2850,10 +2886,12 @@ export default function App() {
               : "💡 Tap any category — instant EMI calculator & official Govt schemes will open."}
           </div>
         </div>
-        {renderCommonOverlays()}
       </div>
-    );
-  }
+      {renderFooter()}
+      {renderCommonOverlays()}
+    </div>
+  );
+}
 
   // ================= STAGE 4.5: INTERACTIVE LOAN EXPLAINER (UNIVERSAL MINIMALIST) =================
   if (stage === 'loan_explainer') {
@@ -2867,8 +2905,9 @@ export default function App() {
     const interestPct = Math.max(0, 100 - principalPct);
 
     return (
-      <div className="min-h-screen bg-[#070B12] text-white flex flex-col items-center justify-center p-4 py-8">
-        <div className="w-full max-w-xl sm:max-w-2xl bg-[#0F1626] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="min-h-screen bg-[#070B12] text-white flex flex-col justify-between items-center relative">
+        <div className="w-full flex-1 flex items-center justify-center p-4 py-8">
+          <div className="w-full max-w-xl sm:max-w-2xl bg-[#0F1626] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
           {/* Top Navigation */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-800">
             <div className="flex items-center gap-3">
@@ -3106,11 +3145,13 @@ export default function App() {
             </button>
           </div>
         </div>
-
-        {renderCommonOverlays()}
       </div>
-    );
-  }
+
+      {renderFooter()}
+      {renderCommonOverlays()}
+    </div>
+  );
+}
 
   // ================= STAGE 4: BANK SELECTION & DOCUMENT GUIDE =================
   if (stage === 'banks') {
@@ -3402,6 +3443,7 @@ export default function App() {
           </div>
         )}
 
+        {renderFooter()}
         {renderCommonOverlays()}
       </div>
     );
@@ -3681,6 +3723,7 @@ export default function App() {
           </div>
         </main>
 
+        {renderFooter()}
         {renderCommonOverlays()}
       </div>
     );
@@ -4062,6 +4105,7 @@ export default function App() {
           </div>
         </main>
 
+        {renderFooter()}
         {renderCommonOverlays()}
       </div>
     );
@@ -4885,6 +4929,7 @@ export default function App() {
           </div>
         )}
 
+        {renderFooter()}
         {renderCommonOverlays()}
       </div>
     );
