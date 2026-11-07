@@ -12,15 +12,15 @@ env/
 venv/
 .venv/
 *.egg-info/
-dist/
-build/
-
 # Node / Frontend
 node_modules/
 frontend/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+# Keep compiled frontend/dist for zero-build Python deployments
+!frontend/dist/
+
 
 # System & IDE
 .DS_Store

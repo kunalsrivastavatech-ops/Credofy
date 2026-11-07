@@ -1,0 +1,21 @@
+{
+  "name": "EquiBharat.ai - Bharat Credit Underwriting",
+  "short_name": "EquiBharat",
+  "description": "Fair & Explainable Digital Credit Underwriting for Bharat",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070B12",
+  "theme_color": "#0F1626",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/fluency/192/bank-building.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/512/bank-building.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
