@@ -26,6 +26,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend code, models, and data
 COPY backend/ ./backend/
+COPY models/ ./models/
 COPY data/ ./data/
 
 # Copy built frontend assets from stage 1
