@@ -969,15 +969,16 @@ export default function App() {
     window.location.href = scheme.officialUrl;
   };
 
-  // User & Account ID State
-  const [loginEmail, setLoginEmail] = useState('kunal.srivastavatech@gmail.com');
-  const [loginName, setLoginName] = useState('Kunal Srivastava');
-  const [user, setUser] = useState({
-    accountId: 'EQUI-USR-0001',
-    name: 'Kunal Srivastava',
-    email: 'kunal.srivastavatech@gmail.com',
-    picture: 'https://api.dicebear.com/7.x/initials/svg?seed=Kunal%20Srivastava&backgroundColor=f59e0b',
-    verifiedWithGoogle: true
+  // User & Account ID State - Dynamic Citizen Authentication
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginName, setLoginName] = useState('');
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('equibharat_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
@@ -1023,7 +1024,7 @@ export default function App() {
 
   // Applicant Financial Parameters
   const [applicant, setApplicant] = useState({
-    applicant_name: "Kunal Srivastava",
+    applicant_name: "",
     ApplicantIncome: 45000,
     CoapplicantIncome: 20000,
     LoanAmount: 4.5,
@@ -1183,7 +1184,7 @@ export default function App() {
   // Fetch Gullak data on load or account change
   const fetchGullakData = async () => {
     try {
-      const res = await fetch(`${API_BASE}/pocket/gullak/${user.accountId || 'EQUI-USR-0001'}`);
+      const res = await fetch(`${API_BASE}/pocket/gullak/${user?.accountId || 'EQUI-USR-0001'}`);
       const data = await res.json();
       if (data && data.total_saved !== undefined) {
         setGullakSummary(data);
@@ -1211,7 +1212,7 @@ export default function App() {
   useEffect(() => {
     fetchGullakData();
     fetchWelfareSchemes('all');
-  }, [stage, user.accountId]);
+  }, [stage, user?.accountId]);
 
   const handleDepositToGullak = async () => {
     if (depositAmount <= 0) return;
@@ -1227,7 +1228,7 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          account_id: user.accountId || 'EQUI-USR-0001',
+          account_id: user?.accountId || 'EQUI-USR-0001',
           jar_id: selectedJar,
           jar_name: jarNames[selectedJar] || "Gullak",
           amount: parseFloat(depositAmount),
@@ -1329,10 +1330,26 @@ export default function App() {
   // 1.8s Splash Screen Timer
   useEffect(() => {
     const timer = setTimeout(() => {
-      setStage('login');
+      // If user is already authenticated in localStorage, take them to terms/dashboard
+      if (user && user.accountId) {
+        setStage('dashboard');
+      } else {
+        setStage('login');
+      }
     }, 1800);
     return () => clearTimeout(timer);
   }, []);
+
+  // Helper to persist user across sessions in localStorage
+  const saveAuthenticatedUser = (userData) => {
+    setUser(userData);
+    setApplicant(prev => ({ ...prev, applicant_name: userData.name }));
+    try {
+      localStorage.setItem('equibharat_user', JSON.stringify(userData));
+    } catch (e) {
+      console.warn("Could not save to localStorage:", e);
+    }
+  };
 
   // Handle Google OAuth Credential (JWT token from real Google popup)
   const handleGoogleCredentialResponse = async (response) => {
@@ -1348,7 +1365,7 @@ export default function App() {
       });
       const data = await res.json();
       if (data && data.account_id) {
-        setUser({ 
+        saveAuthenticatedUser({ 
           accountId: data.account_id,
           name: data.name,
           email: data.email,
@@ -1356,7 +1373,6 @@ export default function App() {
           verifiedWithGoogle: true,
           databaseStatus: data.database_status || 'Active & Verified'
         });
-        setApplicant(prev => ({ ...prev, applicant_name: data.name }));
         setStage('terms');
       }
     } catch (e) {
@@ -1380,6 +1396,19 @@ export default function App() {
             cancel_on_tap_outside: true
           });
 
+          // Render official Google Sign-In button into container
+          const btnContainer = document.getElementById("google-signin-btn-container");
+          if (btnContainer) {
+            btnContainer.innerHTML = "";
+            window.google.accounts.id.renderButton(btnContainer, {
+              theme: "filled_blue",
+              size: "large",
+              shape: "pill",
+              text: "continue_with",
+              width: 280
+            });
+          }
+
           // Initialize Google One Tap if supported
           window.google.accounts.id.prompt();
         } catch (e) {
@@ -1402,9 +1431,17 @@ export default function App() {
   }, [stage]);
 
   const handleGoogleLogin = async (customEmail, customName) => {
+    const rawName = (customName || loginName || '').trim();
+    const rawEmail = (customEmail || loginEmail || '').trim();
+
+    if (!rawName) {
+      alert(isHi ? "कृपया जारी रखने के लिए अपना पूरा नाम दर्ज करें।" : "Please enter your full name to continue.");
+      return;
+    }
+
     setLoading(true);
-    const emailToUse = (customEmail || loginEmail || 'kunal.srivastavatech@gmail.com').trim();
-    const nameToUse = (customName || loginName || 'Kunal Srivastava').trim();
+    const emailToUse = rawEmail || `${rawName.toLowerCase().replace(/\s+/g, '.')}_${Date.now()}@equibharat.ai`;
+    const nameToUse = rawName;
     const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(nameToUse)}&backgroundColor=f59e0b`;
 
     try {
@@ -1415,12 +1452,12 @@ export default function App() {
           email: emailToUse,
           name: nameToUse,
           picture: avatarUrl,
-          google_id: `google_${Date.now()}`
+          google_id: `user_${Date.now()}`
         })
       });
       const data = await res.json();
       if (data && data.account_id) {
-        setUser({ 
+        saveAuthenticatedUser({ 
           accountId: data.account_id,
           name: data.name || nameToUse,
           email: data.email || emailToUse,
@@ -1428,16 +1465,17 @@ export default function App() {
           verifiedWithGoogle: true,
           databaseStatus: data.database_status || 'Active & Verified'
         });
-        setApplicant(prev => ({ ...prev, applicant_name: data.name || nameToUse }));
       }
     } catch (e) {
       console.warn("User registered locally:", e);
-      setUser(prev => ({
-        ...prev,
+      saveAuthenticatedUser({
+        accountId: `EQUI-USR-${Math.floor(Math.random() * 9000 + 1000)}`,
         name: nameToUse,
         email: emailToUse,
-        picture: avatarUrl
-      }));
+        picture: avatarUrl,
+        verifiedWithGoogle: true,
+        databaseStatus: 'Active (Session)'
+      });
     } finally {
       setLoading(false);
       setStage('terms');
@@ -1445,6 +1483,12 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    try {
+      localStorage.removeItem('equibharat_user');
+    } catch {}
+    setUser(null);
+    setLoginEmail('');
+    setLoginName('');
     setProfileDropdownOpen(false);
     setStage('login');
   };
@@ -1457,9 +1501,9 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...applicant,
-          account_id: user.accountId || 'EQUI-USR-0001',
-          email: user.email || 'user@gmail.com',
-          applicant_name: applicant.applicant_name || user.name,
+          account_id: user?.accountId || 'EQUI-USR-0001',
+          email: user?.email || 'user@gmail.com',
+          applicant_name: applicant.applicant_name || user?.name || (isHi ? 'नागरिक' : 'Citizen Borrower'),
           SelectedBank: selectedBank.name,
           loan_purpose: selectedLoanPurpose.name
         })
@@ -1498,10 +1542,10 @@ export default function App() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('applicant_name', applicant.applicant_name || user.name);
+      formData.append('applicant_name', applicant.applicant_name || user?.name || 'Citizen Borrower');
       formData.append('stated_income', applicant.ApplicantIncome);
-      formData.append('account_id', user.accountId || 'EQUI-USR-0001');
-      formData.append('email', user.email || 'user@gmail.com');
+      formData.append('account_id', user?.accountId || 'EQUI-USR-0001');
+      formData.append('email', user?.email || 'user@gmail.com');
 
       const res = await fetch(`${API_BASE}/scan-document`, {
         method: 'POST',
@@ -1519,7 +1563,7 @@ export default function App() {
         filename: file.name,
         document_type: file.name.toLowerCase().includes('pan') ? "PAN Card (Income Tax Dept)" : "Bank Statement",
         confidence: "99.2%",
-        extracted_name: applicant.applicant_name || user.name,
+        extracted_name: applicant.applicant_name || user?.name || 'Citizen Borrower',
         name_match_status: "Exact Match",
         income_validation: `₹${applicant.ApplicantIncome.toLocaleString()}/month confirmed from records`,
         tamper_check: "Clean (No altered text layers)",
@@ -1536,8 +1580,8 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          account_id: user.accountId || 'EQUI-USR-0001',
-          email: user.email || 'user@gmail.com',
+          account_id: user?.accountId || 'EQUI-USR-0001',
+          email: user?.email || 'user@gmail.com',
           bank_id: bank.id,
           bank_name: bank.name,
           portal_url: bank.applyUrl,
@@ -1735,7 +1779,7 @@ export default function App() {
     const verdict = evaluation?.verdict || "Approved";
     const text = `🏛️ *EquiBharat.ai Pre-Sanction Loan Passbook*\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n` +
-      `👤 *Applicant:* ${applicant.applicant_name || user.name}\n` +
+      `👤 *Applicant:* ${applicant.applicant_name || user?.name || 'Citizen'}\n` +
       `🏛️ *Bank:* ${applicant.SelectedBank}\n` +
       `🎯 *Loan Category:* ${selectedLoanPurpose.name}\n` +
       `💰 *Loan Amount:* ₹${applicant.LoanAmount} Lakhs\n` +
@@ -1907,7 +1951,7 @@ export default function App() {
           <div className="grid grid-cols-2 gap-3 text-xs border-b border-slate-200 pb-4">
             <div>
               <span className="text-[10px] text-slate-500 block">Applicant Name:</span>
-              <b className="text-slate-900 font-bold text-sm">{applicant.applicant_name || user.name}</b>
+              <b className="text-slate-900 font-bold text-sm">{applicant.applicant_name || user?.name || (isHi ? "नागरिक आवेदक" : "Citizen Borrower")}</b>
             </div>
             <div>
               <span className="text-[10px] text-slate-500 block">Target Financial Institution:</span>
@@ -2194,51 +2238,57 @@ export default function App() {
   );
 
   // Reusable Account Profile Dropdown Component
-  const renderUserProfileHeader = () => (
-    <div className="relative">
-      <button
-        onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-        className="flex items-center gap-2.5 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 px-3 py-1.5 rounded-2xl transition shadow-md"
-      >
-        <img src={user.picture} alt={user.name} className="w-7 h-7 rounded-full ring-2 ring-amber-400" />
-        <div className="text-left hidden sm:block">
-          <div className="text-xs font-bold text-white flex items-center gap-1.5">
-            <span>{user.name}</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          </div>
-          <div className="text-[10px] text-amber-400 font-mono font-semibold">{user.accountId}</div>
-        </div>
-        <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
-      </button>
+  const renderUserProfileHeader = () => {
+    const activeName = user?.name || (isHi ? "नागरिक खाता" : "Citizen Borrower");
+    const activePic = user?.picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(activeName)}&backgroundColor=f59e0b`;
+    const activeId = user?.accountId || 'EQUI-GUEST';
+    const activeEmail = user?.email || 'citizen@equibharat.ai';
 
-      {profileDropdownOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-[#0F1626] border border-slate-700 rounded-2xl p-4 shadow-2xl z-50 text-left">
-          <div className="flex items-center gap-3 pb-3 border-b border-slate-800">
-            <img src={user.picture} alt={user.name} className="w-10 h-10 rounded-full ring-2 ring-amber-400" />
-            <div>
-              <div className="text-sm font-bold text-white">{user.name}</div>
-              <div className="text-xs text-slate-400 truncate">{user.email}</div>
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+          className="flex items-center gap-2.5 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 px-3 py-1.5 rounded-2xl transition shadow-md"
+        >
+          <img src={activePic} alt={activeName} className="w-7 h-7 rounded-full ring-2 ring-amber-400" />
+          <div className="text-left hidden sm:block">
+            <div className="text-xs font-bold text-white flex items-center gap-1.5">
+              <span>{activeName}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </div>
+            <div className="text-[10px] text-amber-400 font-mono font-semibold">{activeId}</div>
           </div>
+          <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
+        </button>
 
-          <div className="py-3 space-y-2 text-xs border-b border-slate-800">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Account ID:</span>
-              <span className="font-mono font-bold text-amber-400 flex items-center gap-1.5">
-                {user.accountId}
-                <button 
-                  onClick={() => { 
-                    navigator.clipboard.writeText(user.accountId); 
-                    setCopiedId(true); 
-                    setTimeout(() => setCopiedId(false), 1500); 
-                  }}
-                  title="Copy Account ID"
-                  className="text-slate-400 hover:text-white p-0.5"
-                >
-                  {copiedId ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
-              </span>
+        {profileDropdownOpen && (
+          <div className="absolute right-0 mt-2 w-72 bg-[#0F1626] border border-slate-700 rounded-2xl p-4 shadow-2xl z-50 text-left">
+            <div className="flex items-center gap-3 pb-3 border-b border-slate-800">
+              <img src={activePic} alt={activeName} className="w-10 h-10 rounded-full ring-2 ring-amber-400" />
+              <div>
+                <div className="text-sm font-bold text-white">{activeName}</div>
+                <div className="text-xs text-slate-400 truncate">{activeEmail}</div>
+              </div>
             </div>
+
+            <div className="py-3 space-y-2 text-xs border-b border-slate-800">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">Account ID:</span>
+                <span className="font-mono font-bold text-amber-400 flex items-center gap-1.5">
+                  {activeId}
+                  <button 
+                    onClick={() => { 
+                      navigator.clipboard.writeText(activeId); 
+                      setCopiedId(true); 
+                      setTimeout(() => setCopiedId(false), 1500); 
+                    }}
+                    title="Copy Account ID"
+                    className="text-slate-400 hover:text-white p-0.5"
+                  >
+                    {copiedId ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </span>
+              </div>
             <div className="flex items-center justify-between">
               <span className="text-slate-400">Auth Method:</span>
               <span className="text-emerald-400 font-semibold flex items-center gap-1">
@@ -2283,6 +2333,7 @@ export default function App() {
       )}
     </div>
   );
+};
 
   // Floating AI Credit Copilot Chatbot Widget
   const renderChatbot = () => (
@@ -2596,15 +2647,19 @@ export default function App() {
               {isHi ? "सुरक्षित एवं गोपनीय ऋण मूल्यांकन के लिए" : "Institutional credit evaluation & bank verification"}
             </p>
 
-            {/* Official Google Identity Services OAuth 2.0 Button */}
-            <div className="my-8 flex flex-col items-center justify-center min-h-[52px]">
-              <div id="google-signin-btn-container" className="flex justify-center min-h-[44px] w-full">
+            {/* Real Google Identity Services OAuth 2.0 Button */}
+            <div className="my-6 flex flex-col items-center justify-center">
+              <div id="google-signin-btn-container" className="flex justify-center min-h-[44px] w-full mb-3">
                 <button
                   onClick={() => {
-                    handleGoogleLogin();
+                    if (window.google?.accounts?.id) {
+                      window.google.accounts.id.prompt();
+                    } else {
+                      handleGoogleLogin(loginEmail, loginName);
+                    }
                   }}
                   disabled={loading}
-                  className="py-3 px-6 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-full flex items-center justify-center gap-3 shadow-xl transition transform active:scale-[0.99] text-sm"
+                  className="py-3 px-6 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-full flex items-center justify-center gap-3 shadow-xl transition transform active:scale-[0.99] text-sm w-full max-w-[280px]"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -2615,12 +2670,59 @@ export default function App() {
                   <span>Continue with Google</span>
                 </button>
               </div>
-              {loading && (
-                <div className="flex items-center gap-2 mt-4 text-xs text-amber-400 font-medium">
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>{isHi ? "सुरक्षित लॉगिन सत्यापित किया जा रहा है..." : "Authenticating and securing session..."}</span>
+
+              {/* Citizen Name & Email Form (Allows any person to log in under their own identity) */}
+              <div className="w-full space-y-3 mt-3 text-left">
+                <div className="flex items-center gap-2 my-2 text-xs text-slate-500">
+                  <div className="flex-1 h-px bg-slate-800"></div>
+                  <span>{isHi ? "या अपना नाम दर्ज करें" : "Or enter your details"}</span>
+                  <div className="flex-1 h-px bg-slate-800"></div>
                 </div>
-              )}
+
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">
+                    {isHi ? "आपका पूरा नाम *" : "Your Full Name *"}
+                  </label>
+                  <input
+                    type="text"
+                    value={loginName}
+                    onChange={(e) => setLoginName(e.target.value)}
+                    placeholder={isHi ? "उदा. राहुल शर्मा" : "e.g. Rahul Sharma"}
+                    className="w-full py-2.5 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-amber-400 transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">
+                    {isHi ? "ईमेल पता (वैकल्पिक)" : "Email Address (Optional)"}
+                  </label>
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder={isHi ? "उदा. rahul@gmail.com" : "e.g. rahul@gmail.com"}
+                    className="w-full py-2.5 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-amber-400 transition"
+                  />
+                </div>
+
+                <button
+                  onClick={() => handleGoogleLogin(loginEmail, loginName)}
+                  disabled={loading || !loginName.trim()}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>{isHi ? "सुरक्षित सत्यापन किया जा रहा है..." : "Authenticating & securing session..."}</span>
+                    </>
+                  ) : (
+                    <>
+                      <User className="w-4 h-4" />
+                      <span>{isHi ? "प्रवेश करें" : "Sign In & Continue"}</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
@@ -2669,7 +2771,7 @@ export default function App() {
                 </div>
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                {isHi ? `स्वागत है, ${user.name} 👋` : `Welcome, ${user.name} 👋`}
+                {isHi ? `स्वागत है, ${user?.name || "नागरिक"} 👋` : `Welcome, ${user?.name || "Citizen"} 👋`}
               </h2>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                 {isHi 
@@ -2816,7 +2918,7 @@ export default function App() {
               {isHi ? "ऋण का प्रकार चुनें" : "Select Loan Category"}
             </span>
             <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-0.5">
-              {isHi ? `नमस्ते, ${user.name} 👋` : `Hello, ${user.name} 👋`}
+              {isHi ? `नमस्ते, ${user?.name || "नागरिक"} 👋` : `Hello, ${user?.name || "Citizen"} 👋`}
             </h2>
             <p className="text-xs text-slate-400 mt-1">
               {isHi ? "आज आपको किस प्रकार की ऋण सुविधा की आवश्यकता है?" : "Which loan facility do you need today?"}
