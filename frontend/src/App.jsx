@@ -2550,7 +2550,7 @@ export default function App() {
   // Global Institutional Footer: Made with ❤️ by Kunal Srivastava
   const renderFooter = () => (
     <footer className="w-full py-5 border-t border-slate-800/80 bg-[#060911]/95 text-slate-300 text-xs mt-auto relative z-30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left pr-4 sm:pr-48 lg:pr-52">
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left ${stage === 'login' || stage === 'splash' ? '' : 'pr-4 sm:pr-48 lg:pr-52'}`}>
         <div className="flex items-center gap-2.5">
           <EquiBharatLogo className="w-6 h-6 flex-shrink-0" />
           <span className="font-extrabold text-white text-sm tracking-tight">
@@ -2579,7 +2579,7 @@ export default function App() {
   // Common Citizen Overlays: Chatbot Copilot + Helplines Modal + Passbook Slip Modal + Fairness Audit
   const renderCommonOverlays = () => (
     <>
-      {renderChatbot()}
+      {stage !== 'login' && stage !== 'splash' && renderChatbot()}
       {renderHelplineModal()}
       {renderPassbookModal()}
       {renderFairnessModal()}
@@ -2647,15 +2647,13 @@ export default function App() {
               {isHi ? "सुरक्षित एवं गोपनीय ऋण मूल्यांकन के लिए" : "Institutional credit evaluation & bank verification"}
             </p>
 
-            {/* Real Google Identity Services OAuth 2.0 Button */}
-            <div className="my-6 flex flex-col items-center justify-center">
-              <div id="google-signin-btn-container" className="flex justify-center min-h-[44px] w-full mb-3">
+            {/* Real Official Google Identity Services OAuth 2.0 Button */}
+            <div className="my-8 flex flex-col items-center justify-center min-h-[52px]">
+              <div id="google-signin-btn-container" className="flex justify-center min-h-[44px] w-full">
                 <button
                   onClick={() => {
                     if (window.google?.accounts?.id) {
                       window.google.accounts.id.prompt();
-                    } else {
-                      handleGoogleLogin(loginEmail, loginName);
                     }
                   }}
                   disabled={loading}
@@ -2670,59 +2668,12 @@ export default function App() {
                   <span>Continue with Google</span>
                 </button>
               </div>
-
-              {/* Citizen Name & Email Form (Allows any person to log in under their own identity) */}
-              <div className="w-full space-y-3 mt-3 text-left">
-                <div className="flex items-center gap-2 my-2 text-xs text-slate-500">
-                  <div className="flex-1 h-px bg-slate-800"></div>
-                  <span>{isHi ? "या अपना नाम दर्ज करें" : "Or enter your details"}</span>
-                  <div className="flex-1 h-px bg-slate-800"></div>
+              {loading && (
+                <div className="flex items-center gap-2 mt-4 text-xs text-amber-400 font-medium">
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>{isHi ? "सुरक्षित गूगल लॉगिन सत्यापित किया जा रहा है..." : "Authenticating with Google..."}</span>
                 </div>
-
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">
-                    {isHi ? "आपका पूरा नाम *" : "Your Full Name *"}
-                  </label>
-                  <input
-                    type="text"
-                    value={loginName}
-                    onChange={(e) => setLoginName(e.target.value)}
-                    placeholder={isHi ? "उदा. राहुल शर्मा" : "e.g. Rahul Sharma"}
-                    className="w-full py-2.5 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-amber-400 transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">
-                    {isHi ? "ईमेल पता (वैकल्पिक)" : "Email Address (Optional)"}
-                  </label>
-                  <input
-                    type="email"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    placeholder={isHi ? "उदा. rahul@gmail.com" : "e.g. rahul@gmail.com"}
-                    className="w-full py-2.5 px-3.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-amber-400 transition"
-                  />
-                </div>
-
-                <button
-                  onClick={() => handleGoogleLogin(loginEmail, loginName)}
-                  disabled={loading || !loginName.trim()}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-xs"
-                >
-                  {loading ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>{isHi ? "सुरक्षित सत्यापन किया जा रहा है..." : "Authenticating & securing session..."}</span>
-                    </>
-                  ) : (
-                    <>
-                      <User className="w-4 h-4" />
-                      <span>{isHi ? "प्रवेश करें" : "Sign In & Continue"}</span>
-                    </>
-                  )}
-                </button>
-              </div>
+              )}
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
