@@ -12,7 +12,10 @@ from dotenv import load_dotenv
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
+# Ensure both src and backend directories are in sys.path
 sys.path.append(os.path.join(BASE_DIR, 'src'))
+sys.path.append(os.path.join(BASE_DIR, 'backend'))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from xai_engine import CredofyExplainabilityEngine, EquiBharatExplainabilityEngine, KredoExplainabilityEngine
 from fairness_audit import CredofyFairnessAuditor, EquiBharatFairnessAuditor, KredoFairnessAuditor
