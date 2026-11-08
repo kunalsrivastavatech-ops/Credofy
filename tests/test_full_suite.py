@@ -82,7 +82,7 @@ class EquiBharatFullTestSuite(unittest.TestCase):
             self.assertEqual(response.status, 200)
             data = json.loads(response.read().decode())
             self.assertEqual(data["status"], "online")
-            self.assertIn("EquiBharat", data["service"])
+            self.assertTrue("Credofy" in data["service"] or "EquiBharat" in data["service"])
             self.assertGreaterEqual(data["total_applications_in_db"], 2500)
             print(f"  ✓ Test 3 Passed: Health check OK. MongoDB records: {data['total_applications_in_db']}.")
 
@@ -104,7 +104,7 @@ class EquiBharatFullTestSuite(unittest.TestCase):
             self.assertEqual(response.status, 200)
             data = json.loads(response.read().decode())
             self.assertIn("account_id", data)
-            self.assertTrue(data["account_id"].startswith("EQUI-USR-"))
+            self.assertTrue(data["account_id"].startswith("CRD-USR-") or data["account_id"].startswith("EQUI-USR-"))
             self.assertEqual(data["email"], "test.user@equibharat.ai")
             self.assertIn("database_status", data)
             print(f"  ✓ Test 4 Passed: Google Auth synced to MongoDB Account ID: {data['account_id']}.")

@@ -8,9 +8,9 @@ try:
 except ImportError:
     PdfReader = None
 
-class EquiBharatDocumentScanner:
+class CredofyDocumentScanner:
     """
-    Intelligent AI Document Verification Engine for EquiBharat.ai.
+    Intelligent AI Document Verification Engine for Credofy.ai.
     Analyzes uploaded PDFs, images, and text documents, extracts key entities,
     validates Indian identity & income patterns (PAN, Aadhaar, Bank Statement, Salary Slips),
     and computes automated verification scores.
@@ -79,9 +79,10 @@ class EquiBharatDocumentScanner:
             "income_validation": income_verified,
             "tamper_check": "Clean (No digital tampering or altered text layers detected)",
             "pan_number": detected_pan if is_pan else None,
-            "ai_summary": f"{doc_category} successfully authenticated by EquiBharat AI. Document is institutionally valid for loan processing."
+            "ai_summary": f"{doc_category} successfully authenticated by Credofy AI. Document is institutionally valid for loan processing."
         }
 
-document_scanner = EquiBharatDocumentScanner()
-# Backward-compatible alias
-KredoDocumentScanner = EquiBharatDocumentScanner
+document_scanner = CredofyDocumentScanner()
+# Backward-compatible aliases
+EquiBharatDocumentScanner = CredofyDocumentScanner
+KredoDocumentScanner = CredofyDocumentScanner

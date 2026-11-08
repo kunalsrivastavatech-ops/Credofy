@@ -232,4 +232,6 @@ class EquiBharatExplainabilityEngine:
         return cf_en, cf_hi
 
 # Backward-compatible alias
+# Backward compatibility and brand aliases
+CredofyExplainabilityEngine = EquiBharatExplainabilityEngine
 KredoExplainabilityEngine = EquiBharatExplainabilityEngine

@@ -2,9 +2,9 @@ import os
 import re
 from typing import Dict, Any, List, Optional
 
-class EquiBharatCreditChatbot:
+class CredofyCreditChatbot:
     """
-    Intelligent Conversational Credit Copilot for EquiBharat.ai.
+    Intelligent Conversational Credit Copilot for Credofy.ai.
     Understands borrower financials, bank-specific credit policies,
     RBI compliance rules, and provides personalized, actionable guidance.
     """
@@ -186,7 +186,7 @@ class EquiBharatCreditChatbot:
         local_reply = self._local_credit_advisor(user_message, applicant_context)
         return {
             "reply": local_reply,
-            "engine": "EquiBharat Native Credit AI Copilot",
+            "engine": "Credofy Native Credit AI Copilot",
             "gemini_active": False
         }
 
@@ -208,7 +208,7 @@ class EquiBharatCreditChatbot:
         tenure = ctx.get("Loan_Amount_Term", 60)
         cibil = ctx.get("CIBIL_Score", 740)
         
-        return f"""You are the EquiBharat.ai Credit Copilot, an expert Indian banking credit officer.
+        return f"""You are the Credofy.ai Credit Copilot, an expert Indian banking credit officer.
 You are chatting with {name}.
 Applicant Context:
 - Monthly Income: ₹{income:,.0f} (Co-applicant: ₹{co_income:,.0f})
@@ -276,7 +276,7 @@ Guidelines:
                     f"2. **आय का प्रमाण:** पिछले 6 महीनों का प्राथमिक बैंक खाता विवरण (Salary/Income Credit Proof)।\n"
                     f"3. **टैक्स विवरण:** पिछले 2 वर्षों का ITR-V अथवा नियोक्ता द्वारा जारी Form 16।\n"
                     f"4. **वेतन पर्ची:** हाल की 3 महीने की सैलरी स्लिप्स (या MSME के लिए उद्यम/GST प्रमाण)।\n\n"
-                    f"💡 *टिप:* EquiBharat AI के दस्तावेज़ स्कैनर में अपने पेपर्स अपलोड करके 1 मिनट में सत्यापन पूरा कर सकते हैं!"
+                    f"💡 *टिप:* Credofy AI के दस्तावेज़ स्कैनर में अपने पेपर्स अपलोड करके 1 मिनट में सत्यापन पूरा कर सकते हैं!"
                 )
             return (
                 f"For **{bank_name}**, here is the exact document checklist required to ensure 100% swift loan sanction:\n\n"
@@ -344,7 +344,7 @@ Guidelines:
         # General friendly conversational answer
         if is_hindi:
             return (
-                f"नमस्ते {name} जी! मैं आपका EquiBharat AI क्रेडिट सलाहकार हूँ।\n\n"
+                f"नमस्ते {name} जी! मैं आपका Credofy AI क्रेडिट सलाहकार हूँ।\n\n"
                 f"आपकी प्रोफ़ाइल:\n"
                 f"• मासिक आय: ₹{income:,.0f} (सह-आवेदक: ₹{co_income:,.0f})\n"
                 f"• ऋण राशि: ₹{loan_lakhs} लाख ({tenure_months} महीने)\n"
@@ -353,7 +353,7 @@ Guidelines:
             )
 
         return (
-            f"Hello {name}! I am your EquiBharat.ai Credit Copilot.\n\n"
+            f"Hello {name}! I am your Credofy.ai Credit Copilot.\n\n"
             f"I have your real-time parameters loaded:\n"
             f"• Monthly Household Income: ₹{total_income:,.0f} | CIBIL Score: **{cibil}**\n"
             f"• Requested Loan: ₹{loan_lakhs} Lakhs at **{bank_name}** | Estimated EMI: **₹{emi:,.0f}/mo**\n\n"
@@ -366,6 +366,7 @@ Guidelines:
         )
 
 # Global Chatbot Singleton
-credit_chatbot = EquiBharatCreditChatbot()
-# Backward-compatible alias
-KredoCreditChatbot = EquiBharatCreditChatbot
+credit_chatbot = CredofyCreditChatbot()
+# Backward-compatible aliases
+EquiBharatCreditChatbot = CredofyCreditChatbot
+KredoCreditChatbot = CredofyCreditChatbot

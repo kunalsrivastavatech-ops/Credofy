@@ -14,8 +14,8 @@ import {
 const API_BASE = "/api";
 const GOOGLE_CLIENT_ID = "908185147077-c1e9lks8dsh4ct0n7rcfe9mpinrso8k4.apps.googleusercontent.com";
 
-// Premium Classy Brand Emblem for EquiBharat (Scales of Equity & Balanced Justice)
-const EquiBharatLogo = ({ className = "w-10 h-10", glow = false, showText = false, textClass = "" }) => (
+// Premium Classy Brand Emblem for Credofy (Scales of Equity & Balanced Justice)
+const CredofyLogo = ({ className = "w-10 h-10", glow = false, showText = false, textClass = "" }) => (
   <div className={`relative inline-flex items-center gap-3 ${className}`}>
     {glow && (
       <div className="absolute -inset-2 bg-gradient-to-tr from-amber-500/35 via-orange-500/25 to-emerald-500/20 rounded-3xl blur-2xl animate-pulse" />
@@ -61,14 +61,14 @@ const EquiBharatLogo = ({ className = "w-10 h-10", glow = false, showText = fals
       {/* Left Scale Pan (Equity) */}
       <path d="M26 34 L18 50 M32 34 L40 50" stroke="#FDE68A" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.75" />
       <path d="M16 50 Q29 57 42 50" stroke="url(#ebGoldGlow)" strokeWidth="3" fill="none" strokeLinecap="round" filter="url(#ebGlowFilter)" />
-      {/* Monogram 'E' */}
-      <text x="29" y="47" textAnchor="middle" fill="#FDE68A" fontSize="9" fontWeight="900" fontFamily="sans-serif">E</text>
+      {/* Monogram 'C' (Cred) */}
+      <text x="29" y="47" textAnchor="middle" fill="#FDE68A" fontSize="9" fontWeight="900" fontFamily="sans-serif">C</text>
 
       {/* Right Scale Pan (Bharat) */}
       <path d="M58 34 L66 50 M74 34 L82 50" stroke="#FDE68A" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.75" />
       <path d="M58 50 Q71 57 84 50" stroke="url(#ebGoldGlow)" strokeWidth="3" fill="none" strokeLinecap="round" filter="url(#ebGlowFilter)" />
-      {/* Monogram 'B' */}
-      <text x="71" y="47" textAnchor="middle" fill="#FDE68A" fontSize="9" fontWeight="900" fontFamily="sans-serif">B</text>
+      {/* Monogram 'F' (Ofy) */}
+      <text x="71" y="47" textAnchor="middle" fill="#FDE68A" fontSize="9" fontWeight="900" fontFamily="sans-serif">F</text>
 
       {/* Base Foundation of Trust */}
       <path d="M38 74 L62 74" stroke="url(#ebGoldGlow)" strokeWidth="4.5" strokeLinecap="round" />
@@ -77,7 +77,7 @@ const EquiBharatLogo = ({ className = "w-10 h-10", glow = false, showText = fals
     {showText && (
       <div className={`flex flex-col leading-none ${textClass}`}>
         <span className="font-black tracking-tight text-white text-lg">
-          Equi<span className="text-amber-400">Bharat</span>
+          Cred<span className="text-amber-400">ofy</span>
         </span>
         <span className="text-[9px] tracking-widest uppercase font-bold text-slate-400">
           Fair Credit Underwriting
@@ -345,13 +345,13 @@ const LOAN_PURPOSES = [
     whatIsIt_hi: 'शिक्षा ऋण आपकी पढ़ाई के 100% खर्चों (ट्यूशन फीस, हॉस्टल, किताबें, लैपटॉप व विदेश यात्रा टिकट) को कवर करता है। कोर्स की पढ़ाई के दौरान आपको कोई ईएमआई (EMI) नहीं देनी होती।',
     howToGet: [
       'Step 1: Secure confirmed admission or offer letter from recognized Indian (NIRF/UGC/AICTE) or overseas university.',
-      'Step 2: Check your eligibility on EquiBharat.ai with soft bureau verification (0 CIBIL points deducted).',
+      'Step 2: Check your eligibility on Credofy.ai with soft bureau verification (0 CIBIL points deducted).',
       'Step 3: Connect to official Government schemes like Vidya Lakshmi Portal for centralized digital processing.',
       'Step 4: Provide parent/guardian as co-borrower for fast collateral-free sanction up to ₹7.5 Lakhs.'
     ],
     howToGet_hi: [
       'चरण 1: मान्यता प्राप्त भारतीय या विदेशी संस्थान से प्रवेश पत्र (Admission Letter) प्राप्त करें।',
-      'चरण 2: EquiBharat.ai पर पात्रता जांचें (आपके सिबिल स्कोर पर कोई नकारात्मक प्रभाव नहीं पड़ेगा)।',
+      'चरण 2: Credofy.ai पर पात्रता जांचें (आपके सिबिल स्कोर पर कोई नकारात्मक प्रभाव नहीं पड़ेगा)।',
       'चरण 3: विद्या लक्ष्मी जैसे आधिकारिक सरकारी पोर्टल से सीधे आवेदन करें।',
       'चरण 4: ₹7.5 लाख तक बिना किसी संपत्ति गिरवी रखे (Collateral-Free) आसान स्वीकृति पाएं।'
     ],
@@ -674,13 +674,13 @@ const LOAN_PURPOSES = [
     whatIsIt: 'A Personal Loan is an all-purpose unsecured loan that requires zero collateral. It provides instant liquidity for medical emergencies, wedding expenses, home improvement, or high-cost debt consolidation.',
     whatIsIt_hi: 'व्यक्तिगत ऋण एक असुरक्षित ऋण (Unsecured Loan) है जिसमें किसी संपत्ति को गिरवी नहीं रखना पड़ता। यह चिकित्सा, शादी, यात्रा या आपातकालीन जरूरतों के लिए 24-48 घंटों में उपलब्ध होता है।',
     howToGet: [
-      'Step 1: Check your credit score on EquiBharat.ai (720+ secures lowest instant interest rates).',
+      'Step 1: Check your credit score on Credofy.ai (720+ secures lowest instant interest rates).',
       'Step 2: Upload last 3 months salary slips and 6 months bank statement via our AI Scanner.',
       'Step 3: Compare PSU Bank rates (SBI at ~10.3%) vs Private Bank 10-second disbursement (HDFC/ICICI).',
       'Step 4: Complete online Aadhaar e-KYC and receive direct bank account transfer.'
     ],
     howToGet_hi: [
-      'चरण 1: EquiBharat.ai पर अपना सिबिल स्कोर जांचें (720+ होने पर सबसे कम ब्याज दर मिलती है)।',
+      'चरण 1: Credofy.ai पर अपना सिबिल स्कोर जांचें (720+ होने पर सबसे कम ब्याज दर मिलती है)।',
       'चरण 2: पिछले 3 माह की सैलरी स्लिप और 6 माह का बैंक स्टेटमेंट अपलोड करें।',
       'चरण 3: सरकारी बैंक (एसबीआई) व निजी बैंकों (HDFC/ICICI) की दरों की तुलना करें।',
       'चरण 4: आधार ई-केवाईसी पूरा करें और सीधे बैंक खाते में राशि प्राप्त करें।'
@@ -768,13 +768,13 @@ const LOAN_PURPOSES = [
     whatIsIt_hi: 'वाहन ऋण नई या पुरानी कार, दोपहिया वाहन अथवा इलेक्ट्रिक वाहन (EV) की ऑन-रोड कीमत का 90%-100% तक फाइनेंस करने के लिए 7 साल तक की अवधि हेतु दिया जाता है।',
     howToGet: [
       'Step 1: Choose your vehicle and obtain official Proforma Invoice from authorized dealer.',
-      'Step 2: Check your eligibility on EquiBharat to negotiate zero dealer markup and lowest interest rates.',
+      'Step 2: Check your eligibility on Credofy to negotiate zero dealer markup and lowest interest rates.',
       'Step 3: Submit KYC, 6-month bank statement, and salary slip/ITR.',
       'Step 4: Bank issues delivery order (DO) directly to dealer for instant car delivery.'
     ],
     howToGet_hi: [
       'चरण 1: वाहन चुनें और अधिकृत डीलर से प्रोफार्मा इनवॉइस (कोटेशन) प्राप्त करें।',
-      'चरण 2: EquiBharat पर पात्रता जांचकर न्यूनतम ब्याज दर और 0% अतिरिक्त शुल्क सुनिश्चित करें।',
+      'चरण 2: Credofy पर पात्रता जांचकर न्यूनतम ब्याज दर और 0% अतिरिक्त शुल्क सुनिश्चित करें।',
       'चरण 3: केवाईसी, 6 माह का बैंक स्टेटमेंट व आय प्रमाण पत्र जमा करें।',
       'चरण 4: बैंक द्वारा डिलीवरी ऑर्डर (DO) जारी किया जाता है और कार तुरंत आपको मिल जाती है।'
     ],
@@ -974,7 +974,7 @@ export default function App() {
   const [loginName, setLoginName] = useState('');
   const [user, setUser] = useState(() => {
     try {
-      const saved = localStorage.getItem('equibharat_user');
+      const saved = localStorage.getItem('credofy_user') || localStorage.getItem('equibharat_user');
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -1148,7 +1148,7 @@ export default function App() {
     }
   };
 
-  const handleEquiBharatBridge = (scheme) => {
+  const handleCredofyBridge = (scheme) => {
     setSelectedConquerScheme(null);
     if (scheme.loan_purpose_id) {
       const targetPurpose = loanPurposes.find(p => p.id === scheme.loan_purpose_id) || loanPurposes[0];
@@ -1303,7 +1303,7 @@ export default function App() {
   const [chatMessages, setChatMessages] = useState([
     {
       sender: 'bot',
-      text: "Hello! I am your EquiBharat.ai Credit Copilot. Ask me anything about bank interest rates, EMI calculation, CIBIL criteria, or required documents for your loan!"
+      text: "Hello! I am your Credofy.ai Credit Copilot. Ask me anything about bank interest rates, EMI calculation, CIBIL criteria, or required documents for your loan!"
     }
   ]);
   const [chatInput, setChatInput] = useState('');
@@ -1344,6 +1344,7 @@ export default function App() {
           // If user record was deleted from MongoDB Atlas, clear stale phone session
           console.warn("User account not found in MongoDB. Resetting local session to login.");
           try {
+            localStorage.removeItem('credofy_user');
             localStorage.removeItem('equibharat_user');
           } catch {}
           setUser(null);
@@ -1364,6 +1365,7 @@ export default function App() {
     setUser(userData);
     setApplicant(prev => ({ ...prev, applicant_name: userData.name }));
     try {
+      localStorage.setItem('credofy_user', JSON.stringify(userData));
       localStorage.setItem('equibharat_user', JSON.stringify(userData));
     } catch (e) {
       console.warn("Could not save to localStorage:", e);
@@ -1459,7 +1461,7 @@ export default function App() {
     }
 
     setLoading(true);
-    const emailToUse = rawEmail || `${rawName.toLowerCase().replace(/\s+/g, '.')}_${Date.now()}@equibharat.ai`;
+    const emailToUse = rawEmail || `${rawName.toLowerCase().replace(/\s+/g, '.')}_${Date.now()}@credofy.ai`;
     const nameToUse = rawName;
     const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(nameToUse)}&backgroundColor=f59e0b`;
 
@@ -1503,7 +1505,8 @@ export default function App() {
 
   const handleLogout = () => {
     try {
-      localStorage.removeItem('equibharat_user');
+      localStorage.removeItem('credofy_user');
+            localStorage.removeItem('equibharat_user');
     } catch {}
     setUser(null);
     setLoginEmail('');
@@ -1586,7 +1589,7 @@ export default function App() {
         name_match_status: "Exact Match",
         income_validation: `₹${applicant.ApplicantIncome.toLocaleString()}/month confirmed from records`,
         tamper_check: "Clean (No altered text layers)",
-        ai_summary: "Document successfully authenticated by EquiBharat AI engine."
+        ai_summary: "Document successfully authenticated by Credofy AI engine."
       });
     } finally {
       setScanning(false);
@@ -1796,7 +1799,7 @@ export default function App() {
   const handleShareWhatsApp = () => {
     const prob = evaluation?.approval_probability || 95;
     const verdict = evaluation?.verdict || "Approved";
-    const text = `🏛️ *EquiBharat.ai Pre-Sanction Loan Passbook*\n` +
+    const text = `🏛️ *Credofy.ai Pre-Sanction Loan Passbook*\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n` +
       `👤 *Applicant:* ${applicant.applicant_name || user?.name || 'Citizen'}\n` +
       `🏛️ *Bank:* ${applicant.SelectedBank}\n` +
@@ -1950,9 +1953,9 @@ export default function App() {
           {/* Slip Header */}
           <div className="flex items-center justify-between pb-4 border-b-2 border-slate-900">
             <div className="flex items-center gap-3">
-              <EquiBharatLogo className="w-11 h-11 flex-shrink-0" />
+              <CredofyLogo className="w-11 h-11 flex-shrink-0" />
               <div>
-                <h2 className="text-lg font-black tracking-tight text-slate-900">EquiBharat Digital Loan Passbook</h2>
+                <h2 className="text-lg font-black tracking-tight text-slate-900">Credofy Digital Loan Passbook</h2>
                 <p className="text-[10px] text-slate-600 font-medium">Digital Credit Verification Certificate • RBI Fair Lending Code</p>
               </div>
             </div>
@@ -2062,7 +2065,7 @@ export default function App() {
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-800">
             <div className="flex items-center gap-3">
-              <EquiBharatLogo className="w-11 h-11 flex-shrink-0" />
+              <CredofyLogo className="w-11 h-11 flex-shrink-0" />
               <div>
                 <h2 className="text-lg font-black tracking-tight text-white flex items-center gap-2">
                   <span>{isHi ? "एल्गोरिद्मिक निष्पक्षता व मॉडल सटीकता रिपोर्ट" : "Algorithmic Fairness & Model Accuracy Report"}</span>
@@ -2261,7 +2264,7 @@ export default function App() {
     const activeName = user?.name || (isHi ? "नागरिक खाता" : "Citizen Borrower");
     const activePic = user?.picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(activeName)}&backgroundColor=f59e0b`;
     const activeId = user?.accountId || 'EQUI-GUEST';
-    const activeEmail = user?.email || 'citizen@equibharat.ai';
+    const activeEmail = user?.email || 'citizen@credofy.ai';
 
     return (
       <div className="relative">
@@ -2363,7 +2366,7 @@ export default function App() {
           className="flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black px-5 py-3.5 rounded-full shadow-2xl shadow-amber-500/40 transform hover:scale-105 transition"
         >
           <Bot className="w-5 h-5 text-slate-950 animate-bounce" />
-          <span className="text-sm">Ask EquiBharat AI</span>
+          <span className="text-sm">Ask Credofy AI</span>
           <span className="w-2 h-2 rounded-full bg-slate-950 animate-ping" />
         </button>
       ) : (
@@ -2376,7 +2379,7 @@ export default function App() {
               </div>
               <div>
                 <div className="text-sm font-bold text-white flex items-center gap-2">
-                  <span>EquiBharat AI Copilot</span>
+                  <span>Credofy AI Copilot</span>
                   {geminiActive ? (
                     <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold text-[9px] border border-emerald-500/40 flex items-center gap-1">
                       <Sparkles className="w-2.5 h-2.5 text-amber-400" />
@@ -2571,9 +2574,9 @@ export default function App() {
     <footer className="w-full py-5 border-t border-slate-800/80 bg-[#060911]/95 text-slate-300 text-xs mt-auto relative z-30">
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left ${stage === 'login' || stage === 'splash' ? '' : 'pr-4 sm:pr-48 lg:pr-52'}`}>
         <div className="flex items-center gap-2.5">
-          <EquiBharatLogo className="w-6 h-6 flex-shrink-0" />
+          <CredofyLogo className="w-6 h-6 flex-shrink-0" />
           <span className="font-extrabold text-white text-sm tracking-tight">
-            Equi<span className="text-amber-400">Bharat</span><span className="text-amber-400">.ai</span>
+            Cred<span className="text-amber-400">ofy</span><span className="text-amber-400">.ai</span>
           </span>
           <span className="text-slate-700 hidden lg:inline">|</span>
           <span className="text-xs text-slate-400 hidden lg:inline">
@@ -2589,7 +2592,7 @@ export default function App() {
         </div>
 
         <div className="text-[11px] text-slate-500">
-          © 2026 EquiBharat.ai • 100% RBI & Sovereign Bharat Compliant
+          © 2026 Credofy.ai • 100% RBI & Sovereign Bharat Compliant
         </div>
       </div>
     </footer>
@@ -2612,11 +2615,11 @@ export default function App() {
         <div className="relative flex flex-col items-center">
           <div className="absolute w-80 h-80 bg-gradient-to-tr from-amber-500/25 via-orange-500/20 to-emerald-500/20 rounded-full blur-3xl animate-pulse" />
           
-          <EquiBharatLogo className="w-28 h-28 transform animate-bounce" glow={true} />
+          <CredofyLogo className="w-28 h-28 transform animate-bounce" glow={true} />
 
           <div className="mt-8 text-center space-y-2 relative z-10">
             <h1 className="text-4xl font-black tracking-tight text-white">
-              Equi<span className="text-amber-400">Bharat</span><span className="text-amber-400 text-3xl">.ai</span>
+              Cred<span className="text-amber-400">ofy</span><span className="text-amber-400 text-3xl">.ai</span>
             </h1>
             <p className="text-xs uppercase tracking-widest font-extrabold text-amber-300/80">
               Fair Credit & Explainable Underwriting for Bharat
@@ -2639,8 +2642,8 @@ export default function App() {
           <div className="w-full max-w-md bg-[#0F1626] border border-slate-800 rounded-3xl p-8 shadow-2xl relative z-10 text-center">
             <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/80">
               <div className="flex items-center gap-2.5">
-                <EquiBharatLogo className="w-8 h-8 flex-shrink-0" />
-                <span className="font-black text-white text-base tracking-tight">Equi<span className="text-amber-400">Bharat</span><span className="text-amber-400">.ai</span></span>
+                <CredofyLogo className="w-8 h-8 flex-shrink-0" />
+                <span className="font-black text-white text-base tracking-tight">Cred<span className="text-amber-400">ofy</span><span className="text-amber-400">.ai</span></span>
               </div>
               <button
                 onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
@@ -2745,7 +2748,7 @@ export default function App() {
               </h2>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                 {isHi 
-                  ? "ऋण सुविधा चुनने से पूर्व कृपया EquiBharat की निष्पक्ष मूल्यांकन एवं सिबिल सुरक्षा नीति की समीक्षा करें।" 
+                  ? "ऋण सुविधा चुनने से पूर्व कृपया Credofy की निष्पक्ष मूल्यांकन एवं सिबिल सुरक्षा नीति की समीक्षा करें।" 
                   : "Safe, dignified loan underwriting with zero CIBIL score impact and zero agent commissions."}
               </p>
             </div>
@@ -2789,7 +2792,7 @@ export default function App() {
                   </h4>
                   <p className="text-[11px] text-slate-400 leading-relaxed">
                     {isHi 
-                      ? "EquiBharat पर अपनी पात्रता जांचने से आपका आधिकारिक सिबिल/एक्सपीरियन स्कोर 1 अंक भी कम नहीं होता।" 
+                      ? "Credofy पर अपनी पात्रता जांचने से आपका आधिकारिक सिबिल/एक्सपीरियन स्कोर 1 अंक भी कम नहीं होता।" 
                       : "Pre-qualification performs a soft check only. It will never deduct points or flag your official bureau report."}
                   </p>
                 </div>
@@ -2823,8 +2826,8 @@ export default function App() {
                 />
                 <span className="text-xs text-slate-300 leading-snug select-none group-hover:text-white transition">
                   {isHi 
-                    ? "मैंने EquiBharat.ai की निष्पक्ष ऋण नीति एवं सॉफ्ट क्रेडिट जांच सहमति को समझ लिया है और मैं सहमत हूँ।" 
-                    : "I agree to EquiBharat.ai Terms of Service, RBI Fair Lending Policy, and Soft Credit Data Consent."}
+                    ? "मैंने Credofy.ai की निष्पक्ष ऋण नीति एवं सॉफ्ट क्रेडिट जांच सहमति को समझ लिया है और मैं सहमत हूँ।" 
+                    : "I agree to Credofy.ai Terms of Service, RBI Fair Lending Policy, and Soft Credit Data Consent."}
                 </span>
               </label>
 
@@ -3248,7 +3251,7 @@ export default function App() {
               </button>
               <div>
                 <h1 className="text-lg font-black text-white flex items-center gap-2">
-                  <span>Equi<span className="text-amber-400">Bharat</span><span className="text-amber-400">.ai</span> Banking Network</span>
+                  <span>Cred<span className="text-amber-400">ofy</span><span className="text-amber-400">.ai</span> Banking Network</span>
                 </h1>
                 <p className="text-xs text-slate-400">
                   {isHi ? "सरकारी व निजी बैंकों की लाइव दरें व सीधे आवेदन लिंक" : "Official PSU & Private Bank Portals with Direct Apply Desks"}
@@ -3715,7 +3718,7 @@ export default function App() {
                     ) : (
                       <Sparkles className="w-5 h-5 text-slate-950" />
                     )}
-                    <span>{isHi ? "EquiBharat AI द्वारा ऋण स्वीकृति की जांच करें →" : "Evaluate with EquiBharat AI →"}</span>
+                    <span>{isHi ? "Credofy AI द्वारा ऋण स्वीकृति की जांच करें →" : "Evaluate with Credofy AI →"}</span>
                   </button>
                 </div>
               </div>
@@ -3810,7 +3813,7 @@ export default function App() {
             <RefreshCw className="w-8 h-8" />
           </div>
           <h2 className="text-xl font-bold mb-2">Analyzing Credit Profile...</h2>
-          <p className="text-xs text-slate-400 mb-6">Running EquiBharat explainability engine and bank policy verification</p>
+          <p className="text-xs text-slate-400 mb-6">Running Credofy explainability engine and bank policy verification</p>
           <button
             onClick={() => setStage('form')}
             className="px-5 py-2.5 rounded-xl bg-slate-800 text-xs font-bold text-slate-200 hover:bg-slate-700"
@@ -4221,8 +4224,8 @@ export default function App() {
               </button>
               <div>
                 <h1 className="text-xl font-black text-white flex items-center gap-2">
-                  <EquiBharatLogo className="w-7 h-7 flex-shrink-0" />
-                  <span>Equi<span className="text-amber-400">Bharat</span><span className="text-amber-400">.ai</span></span>
+                  <CredofyLogo className="w-7 h-7 flex-shrink-0" />
+                  <span>Cred<span className="text-amber-400">ofy</span><span className="text-amber-400">.ai</span></span>
                   <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 font-bold border border-amber-500/30 flex items-center gap-1">
                     <Landmark className="w-3.5 h-3.5" />
                     <span>{isHi ? "भारत योजना व नियामक कोष" : "Bharat Schemes & Regulations"}</span>
@@ -4237,7 +4240,7 @@ export default function App() {
             <div className="flex items-center gap-3">
               {renderTopModeSwitch()}
               <button
-                onClick={() => speakText(isHi ? "इक्वि-भारत राष्ट्रीय योजना एवं विनियामक कोष में आपका स्वागत है। यहाँ भारत सरकार की सभी ऐतिहासिक, वर्तमान और आगामी योजनाओं का संपूर्ण विवरण उपलब्ध है।" : "Welcome to EquiBharat National Schemes and Regulatory Directory. Access complete details on all central government schemes, official portals, and citizen borrower rights under RBI law.")}
+                onClick={() => speakText(isHi ? "क्रेडोफाई राष्ट्रीय योजना एवं विनियामक कोष में आपका स्वागत है। यहाँ भारत सरकार की सभी ऐतिहासिक, वर्तमान और आगामी योजनाओं का संपूर्ण विवरण उपलब्ध है।" : "Welcome to Credofy National Schemes and Regulatory Directory. Access complete details on all central government schemes, official portals, and citizen borrower rights under RBI law.")}
                 className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-white transition"
                 title={isHi ? "सुनिए (Audio)" : "Audio Guidance"}
               >
@@ -4508,11 +4511,11 @@ export default function App() {
                         {/* Private Commercial Lead Bridge */}
                         {scheme.has_loan_bridge && (
                           <button
-                            onClick={() => handleEquiBharatBridge(scheme)}
+                            onClick={() => handleCredofyBridge(scheme)}
                             className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 transition shadow-sm"
                           >
                             <Zap className="w-3.5 h-3.5 fill-current" />
-                            <span>{isHi ? "इक्वि-भारत पर ऋण पात्रता जांचें →" : "Check Loan Eligibility via EquiBharat →"}</span>
+                            <span>{isHi ? "क्रेडोफाई पर ऋण पात्रता जांचें →" : "Check Loan Eligibility via Credofy →"}</span>
                           </button>
                         )}
                       </div>
@@ -4962,16 +4965,16 @@ export default function App() {
                   </div>
                   <p className="text-xs text-slate-300 max-w-lg mx-auto">
                     {isHi 
-                      ? "इक्वि-भारत एआई अंडरराइटिंग इंजन आपके दस्तावेजों का तुरंत मूल्यांकन करता है और सरकारी योजनाओं के तहत पात्र बैंकों को सीधा लीड भेजता है।"
-                      : "EquiBharat AI underwrites your documents in real-time under RBI guidelines and connects you directly to primary lending public & private banks."}
+                      ? "क्रेडोफाई एआई अंडरराइटिंग इंजन आपके दस्तावेजों का तुरंत मूल्यांकन करता है और सरकारी योजनाओं के तहत पात्र बैंकों को सीधा लीड भेजता है।"
+                      : "Credofy AI underwrites your documents in real-time under RBI guidelines and connects you directly to primary lending public & private banks."}
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
                     <button
-                      onClick={() => handleEquiBharatBridge(selectedConquerScheme)}
+                      onClick={() => handleCredofyBridge(selectedConquerScheme)}
                       className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition"
                     >
                       <Zap className="w-4 h-4 fill-current" />
-                      <span>{isHi ? "इक्वि-भारत पर पूर्व-स्वीकृति प्राप्त करें →" : "Get Pre-Approved on EquiBharat AI →"}</span>
+                      <span>{isHi ? "क्रेडोफाई पर पूर्व-स्वीकृति प्राप्त करें →" : "Get Pre-Approved on Credofy AI →"}</span>
                     </button>
                     <a
                       href={selectedConquerScheme.official_portal_url}
@@ -5013,10 +5016,10 @@ export default function App() {
     <div className="min-h-screen bg-[#070B12] text-white flex flex-col justify-between items-center relative">
       <div className="w-full flex-1 flex items-center justify-center p-4 py-8">
         <div className="w-full max-w-md bg-[#0F1626] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6">
-          <EquiBharatLogo className="w-12 h-12 mx-auto" />
+          <CredofyLogo className="w-12 h-12 mx-auto" />
           <div>
             <h3 className="text-lg font-bold text-white">
-              {isHi ? "EquiBharat.ai सत्र लोड हो रहा है..." : "Loading EquiBharat.ai Workspace..."}
+              {isHi ? "Credofy.ai सत्र लोड हो रहा है..." : "Loading Credofy.ai Workspace..."}
             </h3>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
               {isHi ? "सत्र सुरक्षित रूप से सत्यापित किया जा रहा है।" : "Synchronizing secure session with RBI Fair Lending engine."}
@@ -5033,7 +5036,8 @@ export default function App() {
             </button>
             <button
               onClick={() => {
-                try { localStorage.removeItem('equibharat_user'); } catch {}
+                try { localStorage.removeItem('credofy_user');
+            localStorage.removeItem('equibharat_user'); } catch {}
                 setUser(null);
                 setStage('login');
               }}

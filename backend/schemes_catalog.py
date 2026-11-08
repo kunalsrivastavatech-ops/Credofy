@@ -1,7 +1,7 @@
 """
-EquiBharat.ai - National Schemes, Regulatory Authority & Licensing Encyclopedia
+Credofy.ai - National Schemes, Regulatory Authority & Licensing Encyclopedia
 Complete master repository of Indian central government schemes (Historic, Active, Upcoming),
-licensing compliance playbooks, citizen borrower rights under RBI law, and EquiBharat commercial bridge.
+licensing compliance playbooks, citizen borrower rights under RBI law, and Credofy commercial bridge.
 """
 
 ALL_GOVERNMENT_SCHEMES = [
@@ -32,7 +32,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "personal",
         "lead_tag": "PMJDY_Overdraft",
-        "equibharat_cta": "Check Overdraft & Micro-Loan Eligibility via EquiBharat"
+        "credofy_cta": "Check Overdraft & Micro-Loan Eligibility via Credofy"
     },
     {
         "id": "mudra",
@@ -60,7 +60,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "business",
         "lead_tag": "MUDRA_PMMY",
-        "equibharat_cta": "Get Pre-Approved for MUDRA Loan on EquiBharat AI"
+        "credofy_cta": "Get Pre-Approved for MUDRA Loan on Credofy AI"
     },
     {
         "id": "pmay-urban-gramin",
@@ -88,7 +88,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "home",
         "lead_tag": "PMAY_Home_Subsidy",
-        "equibharat_cta": "Calculate PMAY Subsidy & Pre-Sanction on EquiBharat"
+        "credofy_cta": "Calculate PMAY Subsidy & Pre-Sanction on Credofy"
     },
     {
         "id": "kcc-scheme",
@@ -116,7 +116,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "farmer",
         "lead_tag": "KCC_Agri_Loan",
-        "equibharat_cta": "Verify KCC Eligibility & Apply via EquiBharat"
+        "credofy_cta": "Verify KCC Eligibility & Apply via Credofy"
     },
     {
         "id": "pmegp",
@@ -144,7 +144,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "business",
         "lead_tag": "PMEGP_Subsidy",
-        "equibharat_cta": "Check PMEGP Bank Sanction Likelihood on EquiBharat"
+        "credofy_cta": "Check PMEGP Bank Sanction Likelihood on Credofy"
     },
     {
         "id": "stand-up-india",
@@ -172,7 +172,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "business",
         "lead_tag": "StandUp_India",
-        "equibharat_cta": "Evaluate Stand-Up India Sanction Feasibility on EquiBharat"
+        "credofy_cta": "Evaluate Stand-Up India Sanction Feasibility on Credofy"
     },
 
     # ---------------- ACTIVE CENTRAL SCHEMES (2024-2026) ----------------
@@ -202,7 +202,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "farmer",
         "lead_tag": "PM_Kisan_DBT",
-        "equibharat_cta": "Leverage PM-Kisan DBT for Pre-Approved Agri Loans on EquiBharat"
+        "credofy_cta": "Leverage PM-Kisan DBT for Pre-Approved Agri Loans on Credofy"
     },
     {
         "id": "pm-svanidhi",
@@ -230,7 +230,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "business",
         "lead_tag": "PM_SVANidhi",
-        "equibharat_cta": "Check PM SVANidhi Eligibility on EquiBharat AI"
+        "credofy_cta": "Check PM SVANidhi Eligibility on Credofy AI"
     },
     {
         "id": "pm-vishwakarma",
@@ -258,7 +258,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "business",
         "lead_tag": "PM_Vishwakarma",
-        "equibharat_cta": "Pre-Screen PM Vishwakarma Loan Eligibility on EquiBharat"
+        "credofy_cta": "Pre-Screen PM Vishwakarma Loan Eligibility on Credofy"
     },
     {
         "id": "pm-surya-ghar",
@@ -286,7 +286,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "home",
         "lead_tag": "Solar_Rooftop_Loan",
-        "equibharat_cta": "Apply for 7% Concessional Surya Ghar Loan via EquiBharat"
+        "credofy_cta": "Apply for 7% Concessional Surya Ghar Loan via Credofy"
     },
     {
         "id": "ayushman-bharat",
@@ -314,7 +314,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": False,
         "loan_purpose_id": "personal",
         "lead_tag": "Ayushman_Coverage",
-        "equibharat_cta": "Explore Medical Emergency Financial Protection on EquiBharat"
+        "credofy_cta": "Explore Medical Emergency Financial Protection on Credofy"
     },
     {
         "id": "sukanya-samriddhi",
@@ -342,7 +342,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": False,
         "loan_purpose_id": "education",
         "lead_tag": "Sukanya_Daughter_Fund",
-        "equibharat_cta": "Calculate Long-Term Educational Savings with EquiBharat"
+        "credofy_cta": "Calculate Long-Term Educational Savings with Credofy"
     },
     {
         "id": "vidya-lakshmi",
@@ -370,7 +370,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "education",
         "lead_tag": "VidyaLakshmi_EduLoan",
-        "equibharat_cta": "Check Education Loan Pre-Sanction & Bank Cutoffs on EquiBharat"
+        "credofy_cta": "Check Education Loan Pre-Sanction & Bank Cutoffs on Credofy"
     },
     {
         "id": "cgtmse-msme",
@@ -398,7 +398,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "business",
         "lead_tag": "CGTMSE_5Cr",
-        "equibharat_cta": "Test Commercial Bank Underwriting Probability via EquiBharat"
+        "credofy_cta": "Test Commercial Bank Underwriting Probability via Credofy"
     },
     {
         "id": "lakhpati-didi",
@@ -426,7 +426,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "business",
         "lead_tag": "Lakhpati_Didi_SHG",
-        "equibharat_cta": "Verify Women Entrepreneur Loan Concessions on EquiBharat"
+        "credofy_cta": "Verify Women Entrepreneur Loan Concessions on Credofy"
     },
     {
         "id": "pm-fby",
@@ -454,7 +454,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "farmer",
         "lead_tag": "PMFBY_Crop_Risk",
-        "equibharat_cta": "Connect Crop Insurance Data to Expand Agri Loan Capacity on EquiBharat"
+        "credofy_cta": "Connect Crop Insurance Data to Expand Agri Loan Capacity on Credofy"
     },
 
     # ---------------- UPCOMING & PIPELINE SCHEMES (2026-2027) ----------------
@@ -484,7 +484,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "business",
         "lead_tag": "Viksit_MSME_NextGen",
-        "equibharat_cta": "Be First in Line: Pre-Score Your Enterprise on EquiBharat"
+        "credofy_cta": "Be First in Line: Pre-Score Your Enterprise on Credofy"
     },
     {
         "id": "pm-edrive-scheme",
@@ -512,7 +512,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "business",
         "lead_tag": "EV_Commercial_Loan",
-        "equibharat_cta": "Calculate Commercial EV Fleet Financing on EquiBharat"
+        "credofy_cta": "Calculate Commercial EV Fleet Financing on Credofy"
     },
     {
         "id": "digital-agristack",
@@ -540,7 +540,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "farmer",
         "lead_tag": "AgriStack_Instant_KCC",
-        "equibharat_cta": "Simulate Your Digital AgriStack Credit Readiness on EquiBharat"
+        "credofy_cta": "Simulate Your Digital AgriStack Credit Readiness on Credofy"
     },
     {
         "id": "india-ai-mission",
@@ -568,7 +568,7 @@ ALL_GOVERNMENT_SCHEMES = [
         "has_loan_bridge": True,
         "loan_purpose_id": "business",
         "lead_tag": "IndiaAI_Tech_Startup",
-        "equibharat_cta": "Check Tech Enterprise Capital Feasibility on EquiBharat"
+        "credofy_cta": "Check Tech Enterprise Capital Feasibility on Credofy"
     }
 ]
 

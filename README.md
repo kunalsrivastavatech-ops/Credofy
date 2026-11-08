@@ -1,11 +1,11 @@
-# EquiBharat (इक्वि-भारत) ⚖️
+# Credofy (क्रेडोफाई) ⚖️
 ### Fair & Explainable Credit Underwriting Platform for Bharat
 
 
 ---
 
 ## 🌟 Overview
-**EquiBharat.ai** is an institutional Explainable AI (XAI) credit underwriting and fairness platform built specifically for Indian borrowers and lenders. It addresses Problem DEV-P02 by converting black-box automated loan rejections into transparent, dignified, and mathematically explainable credit decisions:
+**Credofy.ai** is an institutional Explainable AI (XAI) credit underwriting and fairness platform built specifically for Indian borrowers and lenders. It addresses Problem DEV-P02 by converting black-box automated loan rejections into transparent, dignified, and mathematically explainable credit decisions:
 
 1. **Accurate Calibrated Credit Scoring**: Tree-based Random Forest ensemble trained on public Kaggle & UCI credit datasets with 99.36% accuracy and 0.9997 ROC-AUC.
 2. **Bilingual Plain-Language Explanations**: Converts complex game-theoretic SHAP attributions into clear sentences in **English and हिन्दी (Plain Hindi)** with **"Bolo aur Suno" Voiceover audio playback**.
@@ -39,25 +39,25 @@ Open [http://localhost:8000](http://localhost:8000) in your browser.
 ## 📁 System Architecture
 
 ```
-EquiBharat/
+Credofy/
 ├── backend/
 │   └── server.py                   # FastAPI Unified Host (APIs + Static React SPA + MongoDB)
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx                 # Modern React UI + EquiBharat Luxury Logo + Citizen Features
+│   │   ├── App.jsx                 # Modern React UI + Credofy Luxury Logo + Citizen Features
 │   │   └── main.jsx                # React Entrypoint & Error Boundary
 │   ├── public/manifest.json        # PWA Mobile Web App Manifest
 │   └── dist/                       # Optimized production bundle
 ├── models/
-│   ├── equibharat_model.pkl        # Calibrated Random Forest Underwriter
+│   ├── credofy_model.pkl        # Calibrated Random Forest Underwriter
 │   ├── explainer.pkl               # SHAP TreeExplainer
 │   ├── preprocessor.pkl            # Imputer + One-Hot Pipeline
 │   └── accuracy_report.json        # Accuracy, ROC-AUC, Precision, Recall
 ├── src/
-│   ├── xai_engine.py               # EquiBharatExplainabilityEngine (Bilingual SHAP)
-│   ├── fairness_audit.py           # EquiBharatFairnessAuditor (80% Disparate Impact Rule)
-│   ├── ai_chat_engine.py           # EquiBharatCreditChatbot (Gemini 2.0 / Native)
-│   └── document_scanner_engine.py  # EquiBharatDocumentScanner (PAN / KYC / Income OCR)
+│   ├── xai_engine.py               # CredofyExplainabilityEngine (Bilingual SHAP)
+│   ├── fairness_audit.py           # CredofyFairnessAuditor (80% Disparate Impact Rule)
+│   ├── ai_chat_engine.py           # CredofyCreditChatbot (Gemini 2.0 / Native)
+│   └── document_scanner_engine.py  # CredofyDocumentScanner (PAN / KYC / Income OCR)
 ├── tests/
 │   └── test_full_suite.py          # 26 Automated System & Integration Tests
 ├── PITCH_SCRIPT_DEVIATHON.md       # 3-Minute Hackathon Pitch Script

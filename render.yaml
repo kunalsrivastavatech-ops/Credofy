@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: equibharat
+    name: credofy
     runtime: python
     plan: free
     buildCommand: ./build.sh

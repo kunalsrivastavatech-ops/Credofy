@@ -13,11 +13,12 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("EquiBharat ErrorBoundary caught an error:", error, errorInfo);
+    console.error("Credofy ErrorBoundary caught an error:", error, errorInfo);
   }
 
   handleReset = () => {
     try {
+      localStorage.removeItem('credofy_user');
       localStorage.removeItem('equibharat_user');
     } catch {}
     window.location.href = '/';
@@ -49,7 +50,7 @@ class ErrorBoundary extends React.Component {
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚡</div>
             <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '8px' }}>Session Reset & Refresh</h2>
             <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '24px' }}>
-              Your session was refreshed. Click below to continue to the EquiBharat login portal.
+              Your session was refreshed. Click below to continue to the Credofy login portal.
             </p>
             <button
               onClick={this.handleReset}

@@ -98,4 +98,5 @@ class EquiBharatFairnessAuditor:
         return report
 
 # Backward-compatible alias
+CredofyFairnessAuditor = EquiBharatFairnessAuditor
 KredoFairnessAuditor = EquiBharatFairnessAuditor

@@ -14,8 +14,8 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 sys.path.append(os.path.join(BASE_DIR, 'src'))
 
-from xai_engine import EquiBharatExplainabilityEngine, KredoExplainabilityEngine
-from fairness_audit import EquiBharatFairnessAuditor, KredoFairnessAuditor
+from xai_engine import CredofyExplainabilityEngine, EquiBharatExplainabilityEngine, KredoExplainabilityEngine
+from fairness_audit import CredofyFairnessAuditor, EquiBharatFairnessAuditor, KredoFairnessAuditor
 from ai_chat_engine import credit_chatbot
 from document_scanner_engine import document_scanner
 
@@ -149,15 +149,15 @@ scanned_docs_col = CollectionProxy("scanned_documents")
 bank_leads_col = CollectionProxy("bank_leads")
 
 # Initialize Core XAI & Fairness Engines
-xai_engine = EquiBharatExplainabilityEngine(model_dir=os.path.join(BASE_DIR, "models"))
-fairness_auditor = EquiBharatFairnessAuditor(
+xai_engine = CredofyExplainabilityEngine(model_dir=os.path.join(BASE_DIR, "models"))
+fairness_auditor = CredofyFairnessAuditor(
     data_path=os.path.join(BASE_DIR, "data", "indian_loan_data.csv"),
     model_dir=os.path.join(BASE_DIR, "models")
 )
 
 # FastAPI App
 app = FastAPI(
-    title="EquiBharat Enterprise Backend API",
+    title="Credofy Enterprise Backend API",
     description="Intelligent Explainable Loan Decision Engine, Bilingual XAI, and RBI-Compliant Underwriting Platform",
     version="2.1.0"
 )
@@ -217,7 +217,7 @@ def health_check():
 
     return {
         "status": "online",
-        "service": "EquiBharat Underwriting & Fairness API",
+        "service": "Credofy Underwriting & Fairness API",
         "database": db_manager.mode,
         "total_applications_in_db": app_count,
         "total_users_in_db": user_count,
@@ -433,7 +433,7 @@ def authenticate_google_oauth(payload: GoogleAuthPayload):
     1. If `credential` (Google ID Token JWT) is provided, verifies cryptographic signature.
     2. Extracts Google User Claims: sub, email, name, picture.
     3. Finds or creates user in MongoDB `users` collection.
-    4. Issues unique EquiBharat Account ID (e.g. EQUI-USR-0001).
+    4. Issues unique Credofy Account ID (e.g. CRD-USR-0001).
     """
     user_info = {}
     if payload.credential:
@@ -492,7 +492,7 @@ def authenticate_google_oauth(payload: GoogleAuthPayload):
         }
     
     count = users_col.count_documents({}) + 1
-    new_account_id = f"EQUI-USR-{count:04d}"
+    new_account_id = f"CRD-USR-{count:04d}"
     created_at = datetime.utcnow().isoformat()
     new_user = {
         "account_id": new_account_id,
@@ -539,9 +539,9 @@ class ChatbotRequest(BaseModel):
     history: Optional[List[Dict[str, str]]] = []
 
 @app.post("/api/chat")
-def chat_with_equibharat_ai(req: ChatbotRequest):
+def chat_with_credofy_ai(req: ChatbotRequest):
     """
-    Interactive conversational AI Credit Copilot.
+    Interactive conversational AI Credit Copilot for Credofy.
     Answers borrower questions specifically regarding CIBIL, EMI, loan approvals,
     bank comparisons, and documentation in English & Hindi.
     """
@@ -1134,10 +1134,15 @@ def evaluate_conquer_readiness(payload: ConquerReadinessPayload):
         "checklist": checklist,
         "estimated_disbursal_days": target["conquer_metrics"]["timeline_days"],
         "official_portal_url": target["official_portal_url"],
+        "credofy_loan_bridge": {
+            "is_applicable": target.get("has_loan_bridge", False),
+            "loan_purpose_id": target.get("loan_purpose_id", "personal"),
+            "cta_text": target.get("credofy_cta", target.get("equibharat_cta", "Check Loan Eligibility via Credofy"))
+        },
         "equibharat_loan_bridge": {
             "is_applicable": target.get("has_loan_bridge", False),
             "loan_purpose_id": target.get("loan_purpose_id", "personal"),
-            "cta_text": target.get("equibharat_cta", "Check Loan Eligibility via EquiBharat")
+            "cta_text": target.get("credofy_cta", target.get("equibharat_cta", "Check Loan Eligibility via Credofy"))
         }
     }
 

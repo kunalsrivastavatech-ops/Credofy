@@ -1,7 +1,7 @@
 {
-  "name": "EquiBharat.ai - Bharat Credit Underwriting",
-  "short_name": "EquiBharat",
-  "description": "Fair & Explainable Digital Credit Underwriting for Bharat",
+  "name": "Credofy.ai - Fair & Explainable Credit Underwriting",
+  "short_name": "Credofy",
+  "description": "Demystifying Credit with Fair & Explainable AI for Bharat",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#070B12",

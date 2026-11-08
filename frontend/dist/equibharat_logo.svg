@@ -1,0 +1,54 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ebGoldGlow" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="30%" stop-color="#F59E0B" />
+      <stop offset="70%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#92400E" />
+    </linearGradient>
+    <linearGradient id="ebBgSlate" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0E1726" />
+      <stop offset="60%" stop-color="#070B14" />
+      <stop offset="100%" stop-color="#030712" />
+    </linearGradient>
+    <linearGradient id="ebTricolor" x1="50" y1="12" x2="50" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF9933" />
+      <stop offset="50%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#138808" />
+    </linearGradient>
+    <filter id="ebGlowFilter" x="-10%" y="-10%" width="120%" height="120%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#F59E0B" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Luxury Rounded Squircle Base -->
+  <rect x="3" y="3" width="94" height="94" rx="26" fill="url(#ebBgSlate)" stroke="url(#ebGoldGlow)" stroke-width="3" />
+  <rect x="7" y="7" width="86" height="86" rx="22" stroke="#F59E0B" stroke-width="1" stroke-opacity="0.35" fill="none" />
+  
+  <!-- Central Pillar of Institutional Integrity -->
+  <path d="M50 20 L50 74" stroke="url(#ebGoldGlow)" stroke-width="3.5" stroke-linecap="round" />
+  
+  <!-- Auspicious Apex Diamond with Tricolor Core -->
+  <polygon points="50,13 56,19 50,25 44,19" fill="url(#ebTricolor)" stroke="url(#ebGoldGlow)" stroke-width="1.5" />
+  
+  <!-- Balanced Beam of Equity -->
+  <path d="M24 33 Q50 30 76 33" stroke="url(#ebGoldGlow)" stroke-width="3.5" stroke-linecap="round" />
+  <!-- Fulcrum Ring -->
+  <circle cx="50" cy="31.5" r="3" fill="#FDE68A" stroke="#92400E" stroke-width="1" />
+
+  <!-- Left Scale Pan (Equity) -->
+  <path d="M26 34 L18 50 M32 34 L40 50" stroke="#FDE68A" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.75" />
+  <path d="M16 50 Q29 57 42 50" stroke="url(#ebGoldGlow)" stroke-width="3" fill="none" stroke-linecap="round" filter="url(#ebGlowFilter)" />
+  <!-- Monogram 'E' -->
+  <text x="29" y="47" text-anchor="middle" fill="#FDE68A" font-size="9" font-weight="900" font-family="system-ui, -apple-system, sans-serif">E</text>
+
+  <!-- Right Scale Pan (Bharat) -->
+  <path d="M58 34 L66 50 M74 34 L82 50" stroke="#FDE68A" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.75" />
+  <path d="M58 50 Q71 57 84 50" stroke="url(#ebGoldGlow)" stroke-width="3" fill="none" stroke-linecap="round" filter="url(#ebGlowFilter)" />
+  <!-- Monogram 'B' -->
+  <text x="71" y="47" text-anchor="middle" fill="#FDE68A" font-size="9" font-weight="900" font-family="system-ui, -apple-system, sans-serif">B</text>
+
+  <!-- Base Foundation of Trust -->
+  <path d="M38 74 L62 74" stroke="url(#ebGoldGlow)" stroke-width="4.5" stroke-linecap="round" />
+  <path d="M32 79 L68 79" stroke="url(#ebGoldGlow)" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.85" />
+</svg>
