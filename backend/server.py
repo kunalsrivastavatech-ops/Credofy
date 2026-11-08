@@ -692,6 +692,7 @@ def log_bank_portal_redirection(lead: RedirectionLead):
 
 # ================= USER MONGODB RECORDS VIEWER =================
 @app.get("/api/user-records/{account_id}")
+@app.get("/api/user-passbook/{account_id}")
 def get_user_mongodb_records(account_id: str):
     """
     Retrieves all records stored in MongoDB for a specific Google user:
