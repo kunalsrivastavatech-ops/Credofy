@@ -151,6 +151,56 @@ users_col = CollectionProxy("users")
 scanned_docs_col = CollectionProxy("scanned_documents")
 bank_leads_col = CollectionProxy("bank_leads")
 
+# ================= FIREBASE CLOUD FIRESTORE INTEGRATION =================
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+FIREBASE_CREDS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "firebase_credentials.json")
+firebase_db = None
+firebase_status = "Not Initialized"
+
+try:
+    if os.path.exists(FIREBASE_CREDS_PATH):
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(FIREBASE_CREDS_PATH)
+            firebase_admin.initialize_app(cred)
+        firebase_db = firestore.client()
+        firebase_status = "Connected (credofy-51744)"
+        print("✓ Firebase Cloud Firestore initialized for project 'credofy-51744'.")
+except Exception as e:
+    firebase_status = f"Pending Activation: {e}"
+    print("Firebase init notice:", e)
+
+def sync_user_to_firestore(user_doc: dict):
+    """
+    Saves or updates user profile and login timestamp directly in Cloud Firestore.
+    Collection: 'users' -> Document ID: user email
+    """
+    if not firebase_db:
+        return False
+    try:
+        user_email = user_doc.get("email")
+        if not user_email:
+            return False
+        clean_key = user_email.strip().lower()
+        doc_data = {
+            "account_id": user_doc.get("account_id"),
+            "email": clean_key,
+            "name": user_doc.get("name"),
+            "picture": user_doc.get("picture"),
+            "google_id": user_doc.get("google_id"),
+            "auth_provider": user_doc.get("auth_provider", "Google OAuth 2.0"),
+            "created_at": user_doc.get("created_at"),
+            "last_login": user_doc.get("last_login") or datetime.utcnow().isoformat(),
+            "database": "Cloud Firestore",
+            "firestore_synced_at": datetime.utcnow().isoformat()
+        }
+        firebase_db.collection("users").document(clean_key).set(doc_data, merge=True)
+        return True
+    except Exception as e:
+        print("Firestore sync notice (User will also be saved to Mongo):", e)
+        return False
+
 # Initialize Core XAI & Fairness Engines
 xai_engine = CredofyExplainabilityEngine(model_dir=os.path.join(BASE_DIR, "models"))
 fairness_auditor = CredofyFairnessAuditor(
@@ -539,14 +589,26 @@ def authenticate_google_oauth(payload: GoogleAuthPayload, request: Request):
     email = user_info["email"]
     existing = users_col.find_one({"email": email}, {"_id": 0})
     if existing:
+        login_time = datetime.utcnow().isoformat()
         users_col.update_one(
             {"email": email},
             {"$set": {
-                "last_login": datetime.utcnow().isoformat(),
+                "last_login": login_time,
                 "picture": user_info.get("picture") or existing.get("picture"),
                 "name": user_info.get("name") or existing.get("name")
             }}
         )
+        updated_user = {
+            "account_id": existing.get("account_id"),
+            "email": email,
+            "name": user_info.get("name") or existing.get("name"),
+            "picture": user_info.get("picture") or existing.get("picture"),
+            "google_id": user_info.get("google_id") or existing.get("google_id"),
+            "auth_provider": "Google OAuth 2.0",
+            "created_at": existing.get("created_at"),
+            "last_login": login_time
+        }
+        sync_user_to_firestore(updated_user)
         return {
             "status": "authenticated",
             "account_id": existing.get("account_id"),
@@ -554,7 +616,7 @@ def authenticate_google_oauth(payload: GoogleAuthPayload, request: Request):
             "name": existing.get("name"),
             "picture": existing.get("picture"),
             "auth_provider": "Google OAuth 2.0",
-            "database_status": "Active & Secured (256-Bit SSL)",
+            "database_status": "Active & Secured (Firebase Firestore & SSL)",
             "member_since": existing.get("created_at")
         }
     
@@ -572,6 +634,7 @@ def authenticate_google_oauth(payload: GoogleAuthPayload, request: Request):
         "last_login": created_at
     }
     users_col.insert_one(new_user)
+    sync_user_to_firestore(new_user)
     return {
         "status": "created",
         "account_id": new_account_id,
@@ -579,7 +642,7 @@ def authenticate_google_oauth(payload: GoogleAuthPayload, request: Request):
         "name": user_info["name"],
         "picture": user_info["picture"],
         "auth_provider": "Google OAuth 2.0",
-        "database_status": "Active & Secured (256-Bit SSL)",
+        "database_status": "Active & Secured (Firebase Firestore & SSL)",
         "member_since": created_at
     }
 
@@ -706,6 +769,9 @@ def get_db_status():
         "database": "equibharat_db",
         "users_count": user_c,
         "applications_count": app_c,
+        "firebase_firestore": firebase_status,
+        "firebase_project": "credofy-51744",
+        "user_storage_engine": "Cloud Firestore + MongoDB Dual Sync",
         "troubleshooting_note": "Ensure 0.0.0.0/0 is whitelisted in Atlas Security > Network Access, or connect via Personal Mobile Hotspot to avoid port 27017 filtering."
     }
 

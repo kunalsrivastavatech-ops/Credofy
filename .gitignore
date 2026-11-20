@@ -1,6 +1,8 @@
 # Environment & Secrets
 .env
 *.env.local
+*firebase*.json
+backend/firebase_credentials.json
 
 # Python
 __pycache__/
