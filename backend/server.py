@@ -138,8 +138,8 @@ class CollectionProxy:
         self._col_name = col_name
     
     def __getattr__(self, item):
-        # All local proxy collections use fast in-memory storage; primary users live directly in Firebase Cloud Firestore
-        return getattr(db_manager._mock_db[self._col_name], item)
+        target = db_manager.active_db if (db_manager._is_atlas and self._col_name == "users") else db_manager._mock_db
+        return getattr(target[self._col_name], item)
 
 applications_col = CollectionProxy("applications")
 fairness_col = CollectionProxy("fairness_audits")
@@ -249,6 +249,80 @@ def sync_user_to_firestore(user_doc: dict):
     except Exception as e:
         print("Firestore sync notice (User will also be saved to Mongo):", e)
         return False
+
+def migrate_mongo_users_to_firestore():
+    """
+    Migrates all historical users recorded in MongoDB Atlas and local memory
+    directly into Firebase Cloud Firestore 'users' collection.
+    """
+    if not firebase_db:
+        return {"status": "error", "message": "Firebase Cloud Firestore not initialized"}
+    
+    migrated_users = []
+    seen = set()
+    
+    # 1. Fetch from live Atlas database if connected
+    sources = []
+    if db_manager._atlas_db is not None:
+        try:
+            atlas_docs = list(db_manager._atlas_db["users"].find({}))
+            sources.extend(atlas_docs)
+            print(f"✓ Found {len(atlas_docs)} users in MongoDB Atlas.")
+        except Exception as e:
+            print("Atlas user scan notice:", e)
+
+    # 2. Fetch from in-memory fallback
+    try:
+        mock_docs = list(db_manager._mock_db["users"].find({}))
+        sources.extend(mock_docs)
+    except Exception:
+        pass
+
+    for doc in sources:
+        email = doc.get("email")
+        if not email or not isinstance(email, str):
+            continue
+        clean_email = email.strip().lower()
+        if clean_email in seen:
+            continue
+        seen.add(clean_email)
+
+        firestore_payload = {
+            "account_id": doc.get("account_id") or f"CRD-USR-{len(seen):04d}",
+            "email": clean_email,
+            "name": doc.get("name") or clean_email.split("@")[0].replace(".", " ").title(),
+            "picture": doc.get("picture") or "",
+            "google_id": doc.get("google_id") or "",
+            "auth_provider": doc.get("auth_provider") or "Google OAuth 2.0",
+            "created_at": doc.get("created_at") or datetime.utcnow().isoformat(),
+            "last_login": doc.get("last_login") or datetime.utcnow().isoformat(),
+            "database": "Firebase Cloud Firestore",
+            "migrated_from": "MongoDB Atlas",
+            "migrated_at": datetime.utcnow().isoformat()
+        }
+        try:
+            firebase_db.collection("users").document(clean_email).set(firestore_payload, merge=True)
+            migrated_users.append({
+                "email": clean_email,
+                "name": firestore_payload["name"],
+                "account_id": firestore_payload["account_id"]
+            })
+            print(f"✓ Migrated {clean_email} to Firebase Firestore.")
+        except Exception as err:
+            print(f"Failed to migrate {clean_email}:", err)
+
+    return {
+        "status": "success",
+        "migrated_count": len(migrated_users),
+        "migrated_users": migrated_users
+    }
+
+# Auto-migrate any historical MongoDB users to Firestore upon startup
+try:
+    if firebase_db:
+        migrate_mongo_users_to_firestore()
+except Exception as _e:
+    print("Auto-migration startup notice:", _e)
 
 # Initialize Core XAI & Fairness Engines
 xai_engine = CredofyExplainabilityEngine(model_dir=os.path.join(BASE_DIR, "models"))
@@ -849,6 +923,11 @@ def get_db_status():
         "user_storage_engine": "Firebase Cloud Firestore (100% Primary)",
         "troubleshooting_note": "Ensure 0.0.0.0/0 is whitelisted in Atlas Security > Network Access, or connect via Personal Mobile Hotspot to avoid port 27017 filtering."
     }
+
+@app.api_route("/api/admin/migrate-mongo-users", methods=["GET", "POST"])
+def endpoint_migrate_mongo_users():
+    """Migrates historical MongoDB users into Firebase Cloud Firestore."""
+    return migrate_mongo_users_to_firestore()
 
 # ================= AI DOCUMENT SCANNER ENDPOINT =================
 @app.post("/api/scan-document")
