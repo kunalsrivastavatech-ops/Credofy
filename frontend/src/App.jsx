@@ -2616,8 +2616,15 @@ export default function App() {
           <span className="text-xs font-black text-amber-400 tracking-wider">Kunal Srivastava</span>
         </div>
 
-        <div className="text-[11px] text-slate-500">
-          © 2026 Credofy.ai • 100% RBI & Sovereign Bharat Compliant
+        <div className="flex items-center gap-3 text-[11px] text-slate-500">
+          <button
+            onClick={() => setStage('premium_assistance')}
+            className="text-amber-400 hover:text-amber-300 font-bold transition flex items-center gap-1"
+          >
+            <span>⭐ Premium Assistance (₹499)</span>
+          </button>
+          <span>•</span>
+          <span>© 2026 Credofy.ai • 100% RBI & Sovereign Bharat Compliant</span>
         </div>
       </div>
     </footer>
@@ -2723,7 +2730,17 @@ export default function App() {
               )}
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
+            <div className="mt-4 pt-3 border-t border-slate-800">
+              <button
+                onClick={() => setStage('premium_assistance')}
+                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500/15 to-orange-500/15 hover:from-amber-500/25 hover:to-orange-500/25 text-amber-300 border border-amber-500/35 font-bold text-xs flex items-center justify-center gap-2 transition shadow-md"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>⭐ {isHi ? "क्रेडोफाई प्रीमियम सहायता (₹499)" : "Explore Credofy Premium (₹499)"}</span>
+              </button>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>{isHi ? "256-बिट बैंक-ग्रेड एन्क्रिप्शन एवं आरबीआई गोपनीयता अनुपालन" : "Protected by 256-Bit Bank Encryption & RBI Data Privacy"}</span>
             </div>
