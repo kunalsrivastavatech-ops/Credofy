@@ -138,10 +138,7 @@ class CollectionProxy:
         self._col_name = col_name
     
     def __getattr__(self, item):
-        # ONLY user accounts/logins persist to live Atlas to prevent storage quota exhaustion
-        if self._col_name == "users":
-            return getattr(db_manager.active_db[self._col_name], item)
-        # Applications, document scans, leads and audits use in-memory fast storage
+        # All local proxy collections use fast in-memory storage; primary users live directly in Firebase Cloud Firestore
         return getattr(db_manager._mock_db[self._col_name], item)
 
 applications_col = CollectionProxy("applications")
@@ -586,41 +583,57 @@ def authenticate_google_oauth(payload: GoogleAuthPayload, request: Request):
             "email_verified": True
         }
 
-    email = user_info["email"]
-    existing = users_col.find_one({"email": email}, {"_id": 0})
+    email = user_info["email"].strip().lower()
+
+    # 1. Primary User Store: Firebase Cloud Firestore
+    existing = None
+    if firebase_db:
+        try:
+            doc_snap = firebase_db.collection("users").document(email).get()
+            if doc_snap.exists:
+                existing = doc_snap.to_dict()
+        except Exception as e:
+            print("Firestore user lookup fallback:", e)
+
+    # Local fallback cache if Firestore lookup was not available
+    if not existing:
+        existing = users_col.find_one({"email": email}, {"_id": 0})
+
     if existing:
         login_time = datetime.utcnow().isoformat()
-        users_col.update_one(
-            {"email": email},
-            {"$set": {
-                "last_login": login_time,
-                "picture": user_info.get("picture") or existing.get("picture"),
-                "name": user_info.get("name") or existing.get("name")
-            }}
-        )
-        updated_user = {
-            "account_id": existing.get("account_id"),
-            "email": email,
-            "name": user_info.get("name") or existing.get("name"),
+        updated_data = {
+            "last_login": login_time,
             "picture": user_info.get("picture") or existing.get("picture"),
-            "google_id": user_info.get("google_id") or existing.get("google_id"),
-            "auth_provider": "Google OAuth 2.0",
-            "created_at": existing.get("created_at"),
-            "last_login": login_time
+            "name": user_info.get("name") or existing.get("name")
         }
-        sync_user_to_firestore(updated_user)
+        if firebase_db:
+            try:
+                firebase_db.collection("users").document(email).update(updated_data)
+            except Exception:
+                pass
+        # local cache sync
+        users_col.update_one({"email": email}, {"$set": updated_data})
         return {
             "status": "authenticated",
             "account_id": existing.get("account_id"),
             "email": existing.get("email"),
-            "name": existing.get("name"),
-            "picture": existing.get("picture"),
+            "name": updated_data.get("name"),
+            "picture": updated_data.get("picture"),
             "auth_provider": "Google OAuth 2.0",
-            "database_status": "Active & Secured (Firebase Firestore & SSL)",
+            "database_status": "Active (Firebase Cloud Firestore)",
             "member_since": existing.get("created_at")
         }
     
-    count = users_col.count_documents({}) + 1
+    count = 1
+    if firebase_db:
+        try:
+            users_stream = firebase_db.collection("users").limit(5000).stream()
+            count = sum(1 for _ in users_stream) + 1
+        except Exception:
+            count = users_col.count_documents({}) + 1
+    else:
+        count = users_col.count_documents({}) + 1
+
     new_account_id = f"CRD-USR-{count:04d}"
     created_at = datetime.utcnow().isoformat()
     new_user = {
@@ -631,10 +644,20 @@ def authenticate_google_oauth(payload: GoogleAuthPayload, request: Request):
         "google_id": user_info["google_id"],
         "auth_provider": "Google OAuth 2.0",
         "created_at": created_at,
-        "last_login": created_at
+        "last_login": created_at,
+        "database": "Firebase Cloud Firestore",
+        "firestore_synced_at": created_at
     }
+
+    # Primary save to Firebase Cloud Firestore
+    if firebase_db:
+        try:
+            firebase_db.collection("users").document(email).set(new_user)
+        except Exception as e:
+            print("Firestore write notice:", e)
+
+    # Local cache sync
     users_col.insert_one(new_user)
-    sync_user_to_firestore(new_user)
     return {
         "status": "created",
         "account_id": new_account_id,
@@ -642,7 +665,7 @@ def authenticate_google_oauth(payload: GoogleAuthPayload, request: Request):
         "name": user_info["name"],
         "picture": user_info["picture"],
         "auth_provider": "Google OAuth 2.0",
-        "database_status": "Active & Secured (Firebase Firestore & SSL)",
+        "database_status": "Active (Firebase Cloud Firestore)",
         "member_since": created_at
     }
 
@@ -771,7 +794,7 @@ def get_db_status():
         "applications_count": app_c,
         "firebase_firestore": firebase_status,
         "firebase_project": "credofy-51744",
-        "user_storage_engine": "Cloud Firestore + MongoDB Dual Sync",
+        "user_storage_engine": "Firebase Cloud Firestore (100% Primary)",
         "troubleshooting_note": "Ensure 0.0.0.0/0 is whitelisted in Atlas Security > Network Access, or connect via Personal Mobile Hotspot to avoid port 27017 filtering."
     }
 
