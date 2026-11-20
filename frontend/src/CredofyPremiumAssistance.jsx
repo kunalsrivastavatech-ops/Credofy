@@ -3,7 +3,8 @@ import {
   Sparkles, Check, CheckCircle2, ShieldCheck, ArrowRight, 
   HelpCircle, FileText, ArrowLeft, Search, Upload, AlertCircle, 
   Clock, Coins, Phone, QrCode, TrendingUp, Compass, User, 
-  Copy, RefreshCw, X, FileCheck, Info, MessageSquare, AlertTriangle, Shield
+  Copy, RefreshCw, X, FileCheck, Info, MessageSquare, AlertTriangle, Shield,
+  Mail, Send, ExternalLink
 } from 'lucide-react';
 
 export default function CredofyPremiumAssistance({ 
@@ -16,6 +17,7 @@ export default function CredofyPremiumAssistance({
   const paymentSectionRef = useRef(null);
   const howItWorksRef = useRef(null);
   const myRequestsRef = useRef(null);
+  const helpSectionRef = useRef(null);
 
   // Form State
   const [fullName, setFullName] = useState(user?.name || '');
@@ -42,6 +44,30 @@ export default function CredofyPremiumAssistance({
   const [searchResult, setSearchResult] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
+
+  // Direct Gmail Help Box State (kunalsrivastava.tech@gmail.com)
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [helpCopied, setHelpCopied] = useState(false);
+  const [helpSenderName, setHelpSenderName] = useState(user?.name || '');
+  const [helpSenderContact, setHelpSenderContact] = useState(user?.mobile || user?.email || '');
+  const [helpSenderMessage, setHelpSenderMessage] = useState('');
+  const [helpSubmitted, setHelpSubmitted] = useState(false);
+
+  const handleCopyEmail = () => {
+    navigator.clipboard?.writeText('kunalsrivastava.tech@gmail.com');
+    setHelpCopied(true);
+    setTimeout(() => setHelpCopied(false), 2500);
+  };
+
+  const handleSendHelpEmail = (e) => {
+    e?.preventDefault();
+    const subject = encodeURIComponent(`Credofy Support Request - ${helpSenderName.trim() || 'Borrower'}`);
+    const bodyText = `Hello Credofy Support Desk,\n\nApplicant Name: ${helpSenderName.trim() || 'N/A'}\nContact Info: ${helpSenderContact.trim() || 'N/A'}\n\nInquiry Details:\n${helpSenderMessage.trim() || 'I have a question regarding Credofy Premium Borrower Assistance.'}\n\n-- Sent via Credofy Help Desk`;
+    const mailtoUrl = `mailto:kunalsrivastava.tech@gmail.com?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
+    window.location.href = mailtoUrl;
+    setHelpSubmitted(true);
+    setTimeout(() => setHelpSubmitted(false), 5000);
+  };
 
   // Load user's saved premium requests from localStorage
   useEffect(() => {
@@ -369,13 +395,24 @@ export default function CredofyPremiumAssistance({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => {
+                helpSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-xs font-bold text-slate-300 hover:text-amber-400 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-800 hover:border-amber-500/40 transition flex items-center gap-1.5"
+              title="Direct Help Desk (Gmail)"
+            >
+              <Mail className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Help Desk</span>
+            </button>
+
             <button
               onClick={() => myRequestsRef.current?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-xs font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-xl border border-slate-800 hover:border-amber-500/40 transition flex items-center gap-1.5"
+              className="text-xs font-bold text-slate-300 hover:text-amber-400 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-800 hover:border-amber-500/40 transition flex items-center gap-1.5"
             >
               <Clock className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline">Track My Request</span>
+              <span className="hidden sm:inline">Track Request</span>
               <span className="sm:hidden">Status</span>
               {myRequests.length > 0 && (
                 <span className="w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black flex items-center justify-center">
@@ -823,18 +860,16 @@ export default function CredofyPremiumAssistance({
                         </div>
                       </div>
 
-                      {/* WhatsApp Counselor Connect button if verified */}
+                      {/* Advisory Contact Notice if Verified */}
                       {isVerified && (
-                        <div className="mb-4">
-                          <a
-                            href={`https://wa.me/917156184246?text=${encodeURIComponent(`Hello Kunal, I am ${submittedRequest.full_name} (Ref: ${submittedRequest.reference_id}). My ₹499 Credofy Premium payment is verified. Please assist me with my loan rejection.`)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/30 text-center"
-                          >
-                            <span>💬</span>
-                            <span>Chat with Assigned Counselor (WhatsApp)</span>
-                          </a>
+                        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-200 mb-4 flex items-start gap-2.5">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <div className="font-bold text-white mb-0.5">Application Verified & Assigned to Advisory Desk</div>
+                            <p className="text-[11px] text-emerald-300/90 leading-relaxed">
+                              Your case file is now assigned to our senior borrower assistance desk. Our team will contact you directly on your registered mobile number (+91 {submittedRequest.mobile}) and email within 24–48 business hours with your personalized approval action plan.
+                            </p>
+                          </div>
                         </div>
                       )}
 
@@ -842,7 +877,7 @@ export default function CredofyPremiumAssistance({
                       {isPending && (
                         <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 flex items-center gap-2 mb-4">
                           <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping flex-shrink-0" />
-                          <span>Admin has been notified on Telegram. This card will turn green instantly once approved.</span>
+                          <span>Payment verification in progress with our verification desk. This card will automatically update to verified.</span>
                         </div>
                       )}
 
@@ -1126,16 +1161,9 @@ export default function CredofyPremiumAssistance({
                 <div><span className="text-slate-400">Turnaround:</span> <strong className="text-slate-300">48h window</strong></div>
               </div>
               {searchResult.status === 'Payment Verified' && (
-                <div className="mt-3 pt-3 border-t border-emerald-500/20">
-                  <a
-                    href={`https://wa.me/917156184246?text=${encodeURIComponent(`Hello Kunal, my Credofy Premium payment is verified (Ref: ${searchResult.reference_id}). Please assist me.`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition"
-                  >
-                    <span>💬</span>
-                    <span>Chat with Counselor on WhatsApp</span>
-                  </a>
+                <div className="mt-3 pt-3 border-t border-emerald-500/20 text-xs text-emerald-300 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>Verified: Case file assigned to our advisory team. Our team will contact you directly within 24–48 business hours.</span>
                 </div>
               )}
             </div>
@@ -1269,18 +1297,11 @@ export default function CredofyPremiumAssistance({
                     </div>
                   </div>
 
-                  {/* WhatsApp Counselor Button if Verified */}
+                  {/* Direct Contact Notice if Verified */}
                   {req.status === 'Payment Verified' && (
-                    <div className="mt-3">
-                      <a
-                        href={`https://wa.me/917156184246?text=${encodeURIComponent(`Hello Kunal, my Credofy Premium payment is verified (Ref: ${req.reference_id}). Please assist me with my loan application.`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-md shadow-emerald-500/20"
-                      >
-                        <span>💬</span>
-                        <span>Chat with Assigned Counselor on WhatsApp</span>
-                      </a>
+                    <div className="mt-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                      <span>Payment Verified. Our advisory desk will reach out directly to your registered number (+91 {req.mobile}) within 24–48 hours.</span>
                     </div>
                   )}
 
@@ -1292,13 +1313,155 @@ export default function CredofyPremiumAssistance({
         </div>
       </section>
 
-      {/* 8. FOOTER WITH SUPPORT PLACEHOLDER */}
+      {/* 8. DIRECT GMAIL HELP DESK SECTION */}
+      <section ref={helpSectionRef} id="help-desk" className="py-16 px-4 sm:px-6 bg-[#070B14] border-b border-slate-800/80">
+        <div className="max-w-4xl mx-auto">
+          <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-[#0F1626] to-[#0B101D] border border-amber-500/30 shadow-2xl relative overflow-hidden">
+            
+            {/* Background Glow */}
+            <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-800">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                    <Mail className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs uppercase tracking-widest font-black text-amber-400">Direct Support Help Desk</span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Online
+                      </span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-black text-white">Need Assistance? Connect Directly with Us</h3>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCopyEmail}
+                    className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-xs font-bold text-slate-200 transition flex items-center gap-1.5"
+                  >
+                    {helpCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{helpCopied ? "Email Copied!" : "Copy Email"}</span>
+                  </button>
+                  <a
+                    href="mailto:kunalsrivastava.tech@gmail.com?subject=Credofy%20Premium%20Assistance%20Inquiry"
+                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-amber-500/20"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Open in Gmail</span>
+                  </a>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                
+                {/* Left side: Info & Direct Contact */}
+                <div className="md:col-span-2 space-y-4 text-xs text-slate-300">
+                  <p className="leading-relaxed">
+                    Have any questions regarding your <strong>₹499 payment verification</strong>, UTR submission, or borrower assistance plan? Reach out directly to our lead desk:
+                  </p>
+
+                  <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                    <div className="text-[10px] uppercase font-mono text-slate-500 mb-1">Direct Help Desk Gmail</div>
+                    <a
+                      href="mailto:kunalsrivastava.tech@gmail.com?subject=Credofy%20Premium%20Assistance%20Inquiry"
+                      className="font-mono text-sm font-black text-amber-300 hover:underline break-all block"
+                    >
+                      kunalsrivastava.tech@gmail.com
+                    </a>
+                  </div>
+
+                  <div className="space-y-2 text-[11px] text-slate-400 pt-2">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Response turnaround: within 2 to 4 business hours</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Direct priority channel for borrower assistance</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right side: Quick Message Form */}
+                <div className="md:col-span-3 bg-slate-950/70 p-5 rounded-2xl border border-slate-800">
+                  <div className="text-xs font-bold text-white mb-3 flex items-center justify-between">
+                    <span>Send Direct Message to Help Desk</span>
+                    <span className="text-[10px] text-slate-500">Opens in your Gmail</span>
+                  </div>
+
+                  <form onSubmit={handleSendHelpEmail} className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-400 mb-1">Your Name</label>
+                        <input
+                          type="text"
+                          value={helpSenderName}
+                          onChange={(e) => setHelpSenderName(e.target.value)}
+                          placeholder="e.g. Ramesh Kumar"
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-400 mb-1">Mobile / UTR / Reference ID</label>
+                        <input
+                          type="text"
+                          value={helpSenderContact}
+                          onChange={(e) => setHelpSenderContact(e.target.value)}
+                          placeholder="e.g. 9876543210 or CRD-PREM-..."
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-400 mb-1">Your Question or Issue</label>
+                      <textarea
+                        rows={3}
+                        value={helpSenderMessage}
+                        onChange={(e) => setHelpSenderMessage(e.target.value)}
+                        placeholder="Describe your question or issue with your payment / loan assistance..."
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-amber-500 resize-none"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Send to kunalsrivastava.tech@gmail.com</span>
+                    </button>
+                    {helpSubmitted && (
+                      <p className="text-[11px] text-emerald-400 text-center flex items-center justify-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Email composer launched! We will reply to your inquiry shortly.
+                      </p>
+                    )}
+                  </form>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* 9. FOOTER WITH DIRECT GMAIL HELP DESK */}
       <footer className="py-8 px-4 sm:px-6 bg-[#070B14] border-t border-slate-800/80 text-center text-xs text-slate-500">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-400">Credofy Premium Advisory</span>
             <span>•</span>
-            <span>Support: support@credofy.ai</span>
+            <span>Direct Help Desk:</span>
+            <a href="mailto:kunalsrivastava.tech@gmail.com" className="text-amber-400 hover:underline font-mono">
+              kunalsrivastava.tech@gmail.com
+            </a>
           </div>
 
           <div className="flex items-center gap-4 text-[11px]">
@@ -1310,6 +1473,77 @@ export default function CredofyPremiumAssistance({
           </div>
         </div>
       </footer>
+
+      {/* 10. FLOATING QUICK HELP BOX (BOTTOM RIGHT) */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {!isHelpOpen ? (
+          <button
+            onClick={() => setIsHelpOpen(true)}
+            className="px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-2xl shadow-amber-500/30 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 border border-amber-300/30"
+          >
+            <Mail className="w-4 h-4" />
+            <span>Need Help? Contact Us</span>
+          </button>
+        ) : (
+          <div className="w-80 sm:w-96 rounded-3xl bg-[#0F1626] border border-amber-500/40 shadow-2xl p-5 text-left text-slate-200 animate-fadeIn backdrop-blur-xl">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-xs leading-none">Credofy Help Desk</h4>
+                  <span className="text-[10px] text-emerald-400 flex items-center gap-1 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Direct Gmail Support
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsHelpOpen(false)}
+                className="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300 mb-3 leading-relaxed">
+              Have questions about your ₹499 payment, UTR screenshot, or loan advisory? Reach out to us directly:
+            </p>
+
+            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 mb-3 flex items-center justify-between gap-2">
+              <span className="font-mono text-xs text-amber-300 font-bold truncate">
+                kunalsrivastava.tech@gmail.com
+              </span>
+              <button
+                onClick={handleCopyEmail}
+                className="text-[10px] font-bold px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex-shrink-0"
+              >
+                {helpCopied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <a
+                href="mailto:kunalsrivastava.tech@gmail.com?subject=Credofy%20Support%20Request"
+                className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-amber-500/20"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Open Direct in Gmail</span>
+              </a>
+
+              <button
+                onClick={() => {
+                  setIsHelpOpen(false);
+                  helpSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold transition text-center"
+              >
+                Or Write Query Message Here
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
     </div>
   );
