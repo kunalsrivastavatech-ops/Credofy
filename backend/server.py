@@ -158,6 +158,39 @@ fairness_auditor = CredofyFairnessAuditor(
     model_dir=os.path.join(BASE_DIR, "models")
 )
 
+import html
+import re
+from collections import defaultdict
+from starlette.requests import Request
+from starlette.responses import Response, HTMLResponse
+
+# ================= SECURITY ENGINE: RATE LIMITER & CYBER SHIELD =================
+class SecurityRateLimiter:
+    """
+    In-memory sliding-window rate limiter per client IP address.
+    Defends against DDoS, brute-force spam, and bulk file upload attacks.
+    """
+    def __init__(self):
+        self.clients = defaultdict(list)
+    
+    def is_allowed(self, key: str, max_requests: int, window_seconds: int) -> bool:
+        now = time.time()
+        # Evict timestamps outside the sliding window
+        self.clients[key] = [t for t in self.clients[key] if now - t < window_seconds]
+        if len(self.clients[key]) >= max_requests:
+            return False
+        self.clients[key].append(now)
+        return True
+
+rate_limiter = SecurityRateLimiter()
+
+def get_real_client_ip(request: Request) -> str:
+    """Safely extracts real client IP behind proxies, load balancers, or Render CDN."""
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "127.0.0.1"
+
 # FastAPI App
 app = FastAPI(
     title="Credofy Enterprise Backend API",
@@ -165,11 +198,38 @@ app = FastAPI(
     version="2.1.0"
 )
 
+# 1. HTTP Security Headers Middleware (OWASP Standard)
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response: Response = await call_next(request)
+    # Prevent clickjacking / iframe injection
+    response.headers["X-Frame-Options"] = "DENY"
+    # Prevent MIME-type sniffing
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    # Cross-site scripting filter
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    # Strict referrer policy
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    # Hardware feature permission constraints
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    # HSTS for HTTPS connections
+    if request.url.scheme == "https":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
+# 2. Hardened CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+        "https://credofy.onrender.com",
+        "https://credofy.ai"
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -430,14 +490,18 @@ class GoogleAuthPayload(BaseModel):
     google_id: Optional[str] = None
 
 @app.post("/api/auth/google")
-def authenticate_google_oauth(payload: GoogleAuthPayload):
+def authenticate_google_oauth(payload: GoogleAuthPayload, request: Request):
     """
     Real Google OAuth 2.0 with MongoDB Persistence:
     1. If `credential` (Google ID Token JWT) is provided, verifies cryptographic signature.
     2. Extracts Google User Claims: sub, email, name, picture.
     3. Finds or creates user in MongoDB `users` collection.
     4. Issues unique Credofy Account ID (e.g. CRD-USR-0001).
+    Secured: Rate-limited per IP address.
     """
+    client_ip = get_real_client_ip(request)
+    if not rate_limiter.is_allowed(f"auth:{client_ip}", max_requests=60, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Rate Limit: Too many authentication attempts.")
     user_info = {}
     if payload.credential:
         try:
@@ -526,14 +590,14 @@ class UserLoginPayload(BaseModel):
     google_id: Optional[str] = None
 
 @app.post("/api/user-login")
-def login_or_register_user(payload: UserLoginPayload):
+def login_or_register_user(payload: UserLoginPayload, request: Request):
     """Backward-compatible user registration/login route using Google OAuth engine."""
     return authenticate_google_oauth(GoogleAuthPayload(
         email=payload.email,
         name=payload.name,
         picture=payload.picture,
         google_id=payload.google_id
-    ))
+    ), request=request)
 
 # ================= AI CREDIT COPILOT CHATBOT =================
 class ChatbotRequest(BaseModel):
@@ -542,12 +606,20 @@ class ChatbotRequest(BaseModel):
     history: Optional[List[Dict[str, str]]] = []
 
 @app.post("/api/chat")
-def chat_with_credofy_ai(req: ChatbotRequest):
+def chat_with_credofy_ai(req: ChatbotRequest, request: Request):
     """
     Interactive conversational AI Credit Copilot for Credofy.
     Answers borrower questions specifically regarding CIBIL, EMI, loan approvals,
     bank comparisons, and documentation in English & Hindi.
+    Secured: Sliding window rate limit per client IP.
     """
+    client_ip = get_real_client_ip(request)
+    if not rate_limiter.is_allowed(f"chat:{client_ip}", max_requests=40, window_seconds=60):
+        raise HTTPException(
+            status_code=429,
+            detail="Rate Limit Exceeded: Too many chat messages. Please wait 1 minute before sending more."
+        )
+
     res = credit_chatbot.chat_with_meta(
         user_message=req.message,
         applicant_context=req.applicant_context,
@@ -569,10 +641,19 @@ def get_chat_status():
 
 class GeminiKeyPayload(BaseModel):
     api_key: str
+    admin_secret: Optional[str] = None
 
 @app.post("/api/config/gemini-key")
-def configure_gemini_key(payload: GeminiKeyPayload):
-    """Dynamically activates Google Gemini LLM API key."""
+def configure_gemini_key(payload: GeminiKeyPayload, request: Request):
+    """
+    Dynamically activates Google Gemini LLM API key.
+    Secured: Requires TELEGRAM_ADMIN_SECRET in payload or x-admin-secret header.
+    """
+    header_secret = request.headers.get("x-admin-secret")
+    client_secret = payload.admin_secret or header_secret
+    if client_secret != TELEGRAM_ADMIN_SECRET:
+        raise HTTPException(status_code=403, detail="Unauthorized: Invalid Admin Secret Key.")
+
     key = payload.api_key.strip()
     if not key:
         raise HTTPException(status_code=400, detail="API key cannot be empty")
@@ -1239,6 +1320,7 @@ def send_telegram_payment_alert(record: dict, file_bytes: bytes, filename: str):
 
 @app.post("/api/premium/verify-request")
 async def submit_premium_verification(
+    request: Request,
     full_name: str = Form(...),
     email: str = Form(...),
     mobile: str = Form(...),
@@ -1249,15 +1331,24 @@ async def submit_premium_verification(
 ):
     """
     Receives ₹499 borrower assistance payment verification request,
-    validates form details and screenshot, generates unique CRD-PREM-2026-XXXXX ID,
+    validates form details and screenshot with binary signature verification,
+    enforces DDoS rate limits, generates unique CRD-PREM-2026-XXXXX ID,
     stores record, and sends instant Telegram Alert with 1-Click Approval to Admin.
     """
+    # 1. IP Rate Limiting (Protects server memory and prevents Telegram notification flood)
+    client_ip = get_real_client_ip(request)
+    if not rate_limiter.is_allowed(f"prem_upload:{client_ip}", max_requests=10, window_seconds=600):
+        raise HTTPException(
+            status_code=429,
+            detail="Security Rate Limit: Too many verification attempts from this IP. Please wait 10 minutes."
+        )
+
     if not consent:
         raise HTTPException(status_code=400, detail="Consent for payment verification is required.")
 
     clean_name = full_name.strip()
-    if len(clean_name) < 2:
-        raise HTTPException(status_code=400, detail="Please enter a valid full name.")
+    if len(clean_name) < 2 or len(clean_name) > 80:
+        raise HTTPException(status_code=400, detail="Please enter a valid full name (2 to 80 characters).")
 
     clean_email = email.strip().lower()
     if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", clean_email):
@@ -1268,8 +1359,8 @@ async def submit_premium_verification(
         raise HTTPException(status_code=400, detail="Mobile number must be exactly 10 digits.")
 
     clean_utr = utr_number.strip().upper()
-    if len(clean_utr) < 6 or len(clean_utr) > 24:
-        raise HTTPException(status_code=400, detail="Please enter a valid UPI / Bank UTR Transaction Reference number.")
+    if len(clean_utr) < 6 or len(clean_utr) > 24 or not re.match(r"^[A-Z0-9]+$", clean_utr):
+        raise HTTPException(status_code=400, detail="Please enter a valid alphanumeric UPI / Bank UTR Transaction Reference number.")
 
     # Validate screenshot file extension
     ext = os.path.splitext(screenshot.filename or "")[1].lower()
@@ -1283,6 +1374,21 @@ async def submit_premium_verification(
         raise HTTPException(status_code=400, detail="File size exceeds the 5MB limit.")
     if len(content) == 0:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    # 2. Binary Magic Bytes Validation (Prevents disguised shell scripts or malware)
+    is_valid_binary = False
+    if ext in [".jpg", ".jpeg"] and (content.startswith(b"\xff\xd8\xff") or b"\xff\xd8" in content[:8]):
+        is_valid_binary = True
+    elif ext == ".png" and (content.startswith(b"\x89PNG") or b"PNG" in content[:8]):
+        is_valid_binary = True
+    elif ext == ".pdf" and (content.startswith(b"%PDF") or b"%PDF" in content[:8]):
+        is_valid_binary = True
+
+    if not is_valid_binary:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Security Alert: Uploaded file does not have valid {ext.upper().replace('.', '')} binary image/document headers."
+        )
 
     # Generate unique Reference ID: CRD-PREM-2026-XXXXX
     ref_suffix = secrets.token_hex(3).upper()
@@ -1350,11 +1456,20 @@ def handle_admin_action(
         )
 
     clean_ref = ref.strip().upper()
-    record_file = os.path.join(PREMIUM_DATA_DIR, f"{clean_ref}.json")
-    if not os.path.exists(record_file):
+    # 1. Strict regex validation (prevents directory traversal and injection)
+    if not re.match(r"^CRD-PREM-2026-[A-F0-9]{4,10}$", clean_ref):
+        return HTMLResponse(
+            "<html><body style='font-family:sans-serif;background:#0F172A;color:#EF4444;padding:40px;text-align:center;'>"
+            "<h2>❌ Invalid Reference ID Format</h2></body></html>",
+            status_code=400
+        )
+
+    record_file = os.path.abspath(os.path.join(PREMIUM_DATA_DIR, f"{clean_ref}.json"))
+    # Verify file path cannot escape PREMIUM_DATA_DIR
+    if not record_file.startswith(os.path.abspath(PREMIUM_DATA_DIR)) or not os.path.exists(record_file):
         return HTMLResponse(
             f"<html><body style='font-family:sans-serif;background:#0F172A;color:#F59E0B;padding:40px;text-align:center;'>"
-            f"<h2>⚠️ Reference ID Not Found: {clean_ref}</h2></body></html>",
+            f"<h2>⚠️ Reference ID Not Found: {html.escape(clean_ref)}</h2></body></html>",
             status_code=404
         )
 
@@ -1362,6 +1477,8 @@ def handle_admin_action(
         record = json.load(f)
 
     applicant_name = record.get("full_name", "Applicant")
+    safe_name = html.escape(applicant_name)
+    safe_ref = html.escape(clean_ref)
 
     if action.lower() == "approve":
         record["status"] = "Payment Verified"
@@ -1370,7 +1487,7 @@ def handle_admin_action(
         record["agent_assigned"] = "Credofy Advisory Team (Lead Desk)"
         status_color = "#10B981"
         action_text = "APPROVED & VERIFIED"
-        message_detail = f"Payment for <b>{applicant_name}</b> has been approved! Customer's live status is now green and our team will contact them directly."
+        message_detail = f"Payment for <b>{safe_name}</b> has been approved! Customer's live status is now green and our team will contact them directly."
     else:
         record["status"] = "Payment Rejected"
         record["workflow_step"] = "Payment Verification Failed"
@@ -1378,7 +1495,7 @@ def handle_admin_action(
         record["agent_assigned"] = "None"
         status_color = "#EF4444"
         action_text = "REJECTED"
-        message_detail = f"Payment for <b>{applicant_name}</b> has been marked as rejected."
+        message_detail = f"Payment for <b>{safe_name}</b> has been marked as rejected."
 
     record["updated_at"] = datetime.now().isoformat()
 
@@ -1388,7 +1505,7 @@ def handle_admin_action(
 
     # Ping Telegram with confirmation
     try:
-        conf_msg = f"🔔 <b>STATUS UPDATE:</b> Reference <code>{clean_ref}</code> ({applicant_name}) was marked as <b>{action_text}</b> by Admin."
+        conf_msg = f"🔔 <b>STATUS UPDATE:</b> Reference <code>{safe_ref}</code> ({safe_name}) was marked as <b>{html.escape(action_text)}</b> by Admin."
         requests.post(
             f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
             data={"chat_id": TELEGRAM_CHAT_ID, "text": conf_msg, "parse_mode": "HTML"},
@@ -1403,7 +1520,7 @@ def handle_admin_action(
     <head>
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-      <title>Credofy Admin Action — {action_text}</title>
+      <title>Credofy Admin Action — {html.escape(action_text)}</title>
       <style>
         body {{
           background: #070B14;
@@ -1445,9 +1562,9 @@ def handle_admin_action(
     </head>
     <body>
       <div class="card">
-        <div class="badge">Action: {action_text}</div>
+        <div class="badge">Action: {html.escape(action_text)}</div>
         <h2>{message_detail}</h2>
-        <div class="ref">{clean_ref}</div>
+        <div class="ref">{safe_ref}</div>
         <p>The customer's dashboard on Credofy has been updated in real-time. You can close this window now.</p>
       </div>
     </body>
@@ -1457,11 +1574,15 @@ def handle_admin_action(
 @app.get("/api/premium/status/{reference_id}")
 def get_premium_request_status(reference_id: str):
     """
-    LOCAL DEMO ONLY: Fetches the verification & agent status for a given reference ID.
+    Fetches the verification & agent status for a given reference ID.
+    Hardened against Directory Traversal and Regex Format Violations.
     """
     clean_ref = reference_id.strip().upper()
-    record_file = os.path.join(PREMIUM_DATA_DIR, f"{clean_ref}.json")
-    if not os.path.exists(record_file):
+    if not re.match(r"^CRD-PREM-2026-[A-F0-9]{4,10}$", clean_ref):
+        raise HTTPException(status_code=400, detail="Invalid Reference ID format.")
+
+    record_file = os.path.abspath(os.path.join(PREMIUM_DATA_DIR, f"{clean_ref}.json"))
+    if not record_file.startswith(os.path.abspath(PREMIUM_DATA_DIR)) or not os.path.exists(record_file):
         raise HTTPException(status_code=404, detail="Reference ID not found.")
 
     with open(record_file, "r", encoding="utf-8") as f:
@@ -1471,10 +1592,13 @@ def get_premium_request_status(reference_id: str):
 @app.get("/api/premium/my-requests")
 def get_my_premium_requests(identifier: str = Query(..., description="Mobile number or email")):
     """
-    LOCAL DEMO ONLY: Returns all premium requests matching customer's email or mobile number.
+    Returns all premium requests matching customer's email or mobile number.
+    Input-validated to prevent arbitrary parameter abuse.
     """
     clean_id = identifier.strip().lower()
     clean_mobile = re.sub(r"\D", "", clean_id)
+    if len(clean_id) > 100:
+        raise HTTPException(status_code=400, detail="Identifier is too long.")
     results = []
 
     if os.path.exists(PREMIUM_DATA_DIR):
