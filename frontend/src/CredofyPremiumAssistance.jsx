@@ -87,6 +87,55 @@ export default function CredofyPremiumAssistance({
     syncStatus();
   }, [user, email, mobile, apiBase]);
 
+  // Auto-poll status in real-time when any request is Pending Verification
+  useEffect(() => {
+    const pendingRefs = [];
+    if (submittedRequest && (submittedRequest.status === 'Pending Verification' || submittedRequest.status === 'Under Verification')) {
+      pendingRefs.push(submittedRequest.reference_id);
+    }
+    myRequests.forEach(r => {
+      if (r && (r.status === 'Pending Verification' || r.status === 'Under Verification') && !pendingRefs.includes(r.reference_id)) {
+        pendingRefs.push(r.reference_id);
+      }
+    });
+
+    if (pendingRefs.length === 0) return;
+
+    const intervalId = setInterval(async () => {
+      for (const ref of pendingRefs) {
+        try {
+          const res = await fetch(`${apiBase}/premium/status/${encodeURIComponent(ref)}`);
+          if (res.ok) {
+            const json = await res.json();
+            const updated = json?.data;
+            if (updated && updated.status && updated.status !== 'Pending Verification') {
+              // Automatically flip submittedRequest card if active
+              setSubmittedRequest(prev => {
+                if (prev && prev.reference_id === updated.reference_id) {
+                  return { ...prev, ...updated };
+                }
+                return prev;
+              });
+
+              // Automatically update myRequests and localStorage
+              setMyRequests(prev => {
+                const list = prev.map(item => item.reference_id === updated.reference_id ? { ...item, ...updated } : item);
+                try {
+                  localStorage.setItem('credofy_premium_requests', JSON.stringify(list));
+                } catch (e) {}
+                return list;
+              });
+            }
+          }
+        } catch (e) {
+          // Keep polling silently
+        }
+      }
+    }, 4000);
+
+    return () => clearInterval(intervalId);
+  }, [submittedRequest, myRequests, apiBase]);
+
   // Handle File Selection
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -675,64 +724,137 @@ export default function CredofyPremiumAssistance({
               </div>
 
               {submittedRequest ? (
-                /* Success Card After Submission */
-                <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/40 text-left animate-fadeIn">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-                      <CheckCircle2 className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-white text-sm">Request Submitted Successfully</h4>
-                      <p className="text-xs text-emerald-400 font-medium">Awaiting manual verification by the Credofy team</p>
-                    </div>
-                  </div>
+                /* Dynamic Status Card After Submission */
+                (() => {
+                  const isVerified = submittedRequest.status === 'Payment Verified';
+                  const isRejected = submittedRequest.status === 'Payment Rejected';
+                  const isPending = !isVerified && !isRejected;
 
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 mb-4">
-                    <div className="text-[10px] text-slate-400 uppercase font-mono tracking-wider mb-1">Your Unique Reference ID</div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-lg font-black text-amber-400 tracking-wider">
-                        {submittedRequest.reference_id}
-                      </span>
+                  return (
+                    <div className={`p-6 rounded-2xl border text-left animate-fadeIn transition-all duration-300 ${
+                      isVerified
+                        ? 'bg-emerald-950/30 border-emerald-500/60 shadow-lg shadow-emerald-500/10'
+                        : isRejected
+                        ? 'bg-rose-950/30 border-rose-500/60 shadow-lg shadow-rose-500/10'
+                        : 'bg-amber-950/20 border-amber-500/50'
+                    }`}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`w-11 h-11 rounded-2xl border flex items-center justify-center text-lg ${
+                          isVerified
+                            ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                            : isRejected
+                            ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
+                            : 'bg-amber-500/20 border-amber-500/40 text-amber-400'
+                        }`}>
+                          {isVerified ? '✅' : isRejected ? '❌' : '⏳'}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-white text-sm">
+                            {isVerified
+                              ? "Payment Verified – Counselor Assigned!"
+                              : isRejected
+                              ? "Payment Verification Failed"
+                              : "Payment Submitted – Awaiting Verification"}
+                          </h4>
+                          <p className={`text-xs font-medium ${
+                            isVerified ? 'text-emerald-400' : isRejected ? 'text-rose-400' : 'text-amber-400'
+                          }`}>
+                            {isVerified
+                              ? "Your counselor has been assigned and will contact you."
+                              : isRejected
+                              ? "UTR or payment screenshot could not be matched."
+                              : "Live Verification in progress (auto-updates when approved)"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Reference ID banner */}
+                      <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 mb-4">
+                        <div className="text-[10px] text-slate-400 uppercase font-mono tracking-wider mb-1">Your Unique Reference ID</div>
+                        <div className="flex items-center justify-between">
+                          <span className={`font-mono text-lg font-black tracking-wider ${
+                            isVerified ? 'text-emerald-400' : isRejected ? 'text-rose-400' : 'text-amber-400'
+                          }`}>
+                            {submittedRequest.reference_id}
+                          </span>
+                          <button
+                            onClick={() => handleCopyRef(submittedRequest.reference_id)}
+                            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-1 transition"
+                          >
+                            {copiedRef ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            <span>{copiedRef ? "Copied" : "Copy ID"}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Details table */}
+                      <div className="space-y-2 text-xs text-slate-300 mb-5">
+                        <div className="flex justify-between py-1 border-b border-slate-800">
+                          <span className="text-slate-400">Applicant:</span>
+                          <span className="font-bold text-white">{submittedRequest.full_name}</span>
+                        </div>
+                        <div className="flex justify-between py-1 border-b border-slate-800">
+                          <span className="text-slate-400">Mobile:</span>
+                          <span className="font-mono text-white">{submittedRequest.mobile}</span>
+                        </div>
+                        <div className="flex justify-between py-1 border-b border-slate-800">
+                          <span className="text-slate-400">UTR / Ref:</span>
+                          <span className="font-mono text-white">{submittedRequest.utr_number}</span>
+                        </div>
+                        <div className="flex justify-between py-1 border-b border-slate-800">
+                          <span className="text-slate-400">Live Status:</span>
+                          <span className={`font-bold ${
+                            isVerified ? 'text-emerald-400' : isRejected ? 'text-rose-400' : 'text-amber-400'
+                          }`}>
+                            {submittedRequest.status}
+                          </span>
+                        </div>
+                        <div className="flex justify-between py-1 border-b border-slate-800">
+                          <span className="text-slate-400">Assigned Counselor:</span>
+                          <span className="font-bold text-white">
+                            {submittedRequest.agent_assigned || (isPending ? "Assigning upon verification" : "None")}
+                          </span>
+                        </div>
+                        <div className="flex justify-between py-1">
+                          <span className="text-slate-400">Turnaround:</span>
+                          <span className="text-slate-300">
+                            {isVerified ? "48-Hour Priority Window Active" : "48h counselor connection window"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* WhatsApp Counselor Connect button if verified */}
+                      {isVerified && (
+                        <div className="mb-4">
+                          <a
+                            href={`https://wa.me/917156184246?text=${encodeURIComponent(`Hello Kunal, I am ${submittedRequest.full_name} (Ref: ${submittedRequest.reference_id}). My ₹499 Credofy Premium payment is verified. Please assist me with my loan rejection.`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/30 text-center"
+                          >
+                            <span>💬</span>
+                            <span>Chat with Assigned Counselor (WhatsApp)</span>
+                          </a>
+                        </div>
+                      )}
+
+                      {/* Live Polling Notice if Pending */}
+                      {isPending && (
+                        <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 flex items-center gap-2 mb-4">
+                          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping flex-shrink-0" />
+                          <span>Admin has been notified on Telegram. This card will turn green instantly once approved.</span>
+                        </div>
+                      )}
+
                       <button
-                        onClick={() => handleCopyRef(submittedRequest.reference_id)}
-                        className="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-1 transition"
+                        onClick={() => setSubmittedRequest(null)}
+                        className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition text-center"
                       >
-                        {copiedRef ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedRef ? "Copied" : "Copy ID"}</span>
+                        Submit Another Verification Request
                       </button>
                     </div>
-                  </div>
-
-                  <div className="space-y-2 text-xs text-slate-300 mb-6">
-                    <div className="flex justify-between py-1 border-b border-slate-800">
-                      <span className="text-slate-400">Applicant:</span>
-                      <span className="font-bold text-white">{submittedRequest.full_name}</span>
-                    </div>
-                    <div className="flex justify-between py-1 border-b border-slate-800">
-                      <span className="text-slate-400">Mobile:</span>
-                      <span className="font-mono text-white">{submittedRequest.mobile}</span>
-                    </div>
-                    <div className="flex justify-between py-1 border-b border-slate-800">
-                      <span className="text-slate-400">UTR / Ref:</span>
-                      <span className="font-mono text-white">{submittedRequest.utr_number}</span>
-                    </div>
-                    <div className="flex justify-between py-1 border-b border-slate-800">
-                      <span className="text-slate-400">Status:</span>
-                      <span className="font-bold text-amber-400">{submittedRequest.status}</span>
-                    </div>
-                    <div className="flex justify-between py-1">
-                      <span className="text-slate-400">Turnaround:</span>
-                      <span className="text-slate-300">Agent assigned within 48h of verification</span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setSubmittedRequest(null)}
-                    className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition text-center"
-                  >
-                    Submit Another Verification Request
-                  </button>
-                </div>
+                  );
+                })()
               ) : (
                 /* Form Inputs */
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -982,16 +1104,40 @@ export default function CredofyPremiumAssistance({
           )}
 
           {searchResult && (
-            <div className="mb-8 p-6 rounded-2xl bg-amber-500/5 border border-amber-500/30">
+            <div className={`mb-8 p-6 rounded-2xl border ${
+              searchResult.status === 'Payment Verified'
+                ? 'bg-emerald-950/20 border-emerald-500/40'
+                : searchResult.status === 'Payment Rejected'
+                ? 'bg-rose-950/20 border-rose-500/40'
+                : 'bg-amber-500/5 border-amber-500/30'
+            }`}>
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
-                <span className="text-xs font-bold text-amber-400">Lookup Result for {searchResult.reference_id}</span>
+                <span className={`text-xs font-bold ${
+                  searchResult.status === 'Payment Verified' ? 'text-emerald-400' : searchResult.status === 'Payment Rejected' ? 'text-rose-400' : 'text-amber-400'
+                }`}>
+                  Lookup Result for {searchResult.reference_id}
+                </span>
                 <button onClick={() => setSearchResult(null)} className="text-xs text-slate-400 hover:text-white">✕ Close</button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div><span className="text-slate-400">Status:</span> <strong className="text-amber-400">{searchResult.status}</strong></div>
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs mb-3">
+                <div><span className="text-slate-400">Status:</span> <strong className={searchResult.status === 'Payment Verified' ? 'text-emerald-400' : searchResult.status === 'Payment Rejected' ? 'text-rose-400' : 'text-amber-400'}>{searchResult.status}</strong></div>
                 <div><span className="text-slate-400">Workflow:</span> <strong className="text-white">{searchResult.workflow_step}</strong></div>
-                <div><span className="text-slate-400">Turnaround:</span> <strong className="text-slate-300">Agent assigned within 48h</strong></div>
+                <div><span className="text-slate-400">Counselor:</span> <strong className="text-amber-300">{searchResult.agent_assigned || "Pending Verification"}</strong></div>
+                <div><span className="text-slate-400">Turnaround:</span> <strong className="text-slate-300">48h window</strong></div>
               </div>
+              {searchResult.status === 'Payment Verified' && (
+                <div className="mt-3 pt-3 border-t border-emerald-500/20">
+                  <a
+                    href={`https://wa.me/917156184246?text=${encodeURIComponent(`Hello Kunal, my Credofy Premium payment is verified (Ref: ${searchResult.reference_id}). Please assist me.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition"
+                  >
+                    <span>💬</span>
+                    <span>Chat with Counselor on WhatsApp</span>
+                  </a>
+                </div>
+              )}
             </div>
           )}
 
@@ -1041,8 +1187,20 @@ export default function CredofyPremiumAssistance({
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
+                        req.status === 'Payment Verified'
+                          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                          : req.status === 'Payment Rejected'
+                          ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                          : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                      }`}>
+                        <span className={`w-2 h-2 rounded-full ${
+                          req.status === 'Payment Verified'
+                            ? 'bg-emerald-400'
+                            : req.status === 'Payment Rejected'
+                            ? 'bg-rose-400'
+                            : 'bg-amber-400 animate-pulse'
+                        }`} />
                         <span>{req.status || "Pending Verification"}</span>
                       </span>
                     </div>
@@ -1053,8 +1211,9 @@ export default function CredofyPremiumAssistance({
                     <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-2">Service Lifecycle Tracking</div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
                       {WORKFLOW_STEPS.map((step) => {
+                        const isVerified = req.status === 'Payment Verified';
                         const isCurrent = step.name === (req.workflow_step || "Under Verification");
-                        const isPast = step.id === 1;
+                        const isPast = step.id === 1 || (isVerified && (step.id === 2 || step.id === 3));
                         return (
                           <div
                             key={step.id}
@@ -1088,17 +1247,42 @@ export default function CredofyPremiumAssistance({
 
                     <div>
                       <div className="text-[10px] text-slate-500">Assistance Agent</div>
-                      <div className="text-amber-400 font-bold mt-0.5">{req.agent_assigned || "Pending Verification"}</div>
+                      <div className={`font-bold mt-0.5 ${req.status === 'Payment Verified' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        {req.agent_assigned || (req.status === 'Payment Verified' ? 'Kunal (Lead Borrower Counselor)' : 'Pending Verification')}
+                      </div>
                     </div>
                   </div>
 
                   {/* Status explanation */}
-                  <div className="mt-4 text-xs text-slate-300 flex items-start gap-2 bg-amber-500/5 p-3 rounded-xl border border-amber-500/20">
-                    <Info className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div className={`mt-4 text-xs flex items-start gap-2 p-3 rounded-xl border ${
+                    req.status === 'Payment Verified'
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
+                      : req.status === 'Payment Rejected'
+                      ? 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                      : 'bg-amber-500/5 border-amber-500/20 text-slate-300'
+                  }`}>
+                    <Info className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
+                      req.status === 'Payment Verified' ? 'text-emerald-400' : req.status === 'Payment Rejected' ? 'text-rose-400' : 'text-amber-400'
+                    }`} />
                     <div>
                       <strong>Latest Status:</strong> {req.status_explanation || "Your payment verification request is under review. A dedicated borrower assistance agent will be assigned within 48 hours following successful manual verification."}
                     </div>
                   </div>
+
+                  {/* WhatsApp Counselor Button if Verified */}
+                  {req.status === 'Payment Verified' && (
+                    <div className="mt-3">
+                      <a
+                        href={`https://wa.me/917156184246?text=${encodeURIComponent(`Hello Kunal, my Credofy Premium payment is verified (Ref: ${req.reference_id}). Please assist me with my loan application.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-md shadow-emerald-500/20"
+                      >
+                        <span>💬</span>
+                        <span>Chat with Assigned Counselor on WhatsApp</span>
+                      </a>
+                    </div>
+                  )}
 
                 </div>
               ))}

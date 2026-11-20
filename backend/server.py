@@ -1151,13 +1151,91 @@ def evaluate_conquer_readiness(payload: ConquerReadinessPayload):
     }
 
 
-# ================= CREDOFY PREMIUM BORROWER ASSISTANCE (LOCAL DEMO ONLY) =================
+# ================= CREDOFY PREMIUM BORROWER ASSISTANCE (LOCAL & TELEGRAM CONNECTED) =================
 import secrets
 import re
+import urllib.parse
+import requests
 
 PREMIUM_DATA_DIR = os.path.join(BASE_DIR, "data", "premium_requests")
 PREMIUM_UPLOADS_DIR = os.path.join(PREMIUM_DATA_DIR, "uploads")
 os.makedirs(PREMIUM_UPLOADS_DIR, exist_ok=True)
+
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "9092152966:AAGUCgtSXrZiWFTh9pbnrj9Pgw7GPqoWVss")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "7156184246")
+TELEGRAM_ADMIN_SECRET = os.environ.get("TELEGRAM_ADMIN_SECRET", "credofy_kunal_secret_2026")
+PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "https://credofy.onrender.com")
+
+def send_telegram_payment_alert(record: dict, file_bytes: bytes, filename: str):
+    """
+    Sends real-time photo alert with UTR number, applicant details, 
+    and 1-click Approve/Reject action buttons to Admin's Telegram phone app.
+    """
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return
+
+    ref_id = record["reference_id"]
+    name = record["full_name"]
+    mobile = record["mobile"]
+    email = record["email"]
+    utr = record["utr_number"]
+    notes = record.get("rejection_notes") or "None provided"
+
+    caption = (
+        f"🚨 <b>NEW CREDOFY PREMIUM PAYMENT!</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"💰 <b>Amount:</b> ₹499 (UPI Transfer)\n"
+        f"👤 <b>Applicant:</b> {name}\n"
+        f"📱 <b>Mobile:</b> +91 {mobile}\n"
+        f"📧 <b>Email:</b> {email}\n"
+        f"🔢 <b>UTR / Ref:</b> <code>{utr}</code>\n"
+        f"🆔 <b>Ref ID:</b> <code>{ref_id}</code>\n"
+        f"📝 <b>Rejection Notes:</b> {notes[:100]}\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"👇 <i>Tap below to approve or contact applicant directly:</i>"
+    )
+
+    approve_url = f"{PUBLIC_BASE_URL}/api/premium/admin-action?ref={ref_id}&action=approve&secret={TELEGRAM_ADMIN_SECRET}"
+    reject_url = f"{PUBLIC_BASE_URL}/api/premium/admin-action?ref={ref_id}&action=reject&secret={TELEGRAM_ADMIN_SECRET}"
+    wa_msg = urllib.parse.quote(f"Hello {name}, I am from Credofy. We received your ₹499 payment verification (Ref: {ref_id}). I am your dedicated borrower assistance counselor.")
+    whatsapp_url = f"https://wa.me/91{mobile}?text={wa_msg}"
+
+    reply_markup = {
+        "inline_keyboard": [
+            [
+                {"text": "✅ Approve Payment (1-Click)", "url": approve_url},
+                {"text": "❌ Reject", "url": reject_url}
+            ],
+            [
+                {"text": "💬 WhatsApp Customer Directly", "url": whatsapp_url}
+            ]
+        ]
+    }
+
+    try:
+        ext = os.path.splitext(filename)[1].lower()
+        if ext in ['.jpg', '.jpeg', '.png']:
+            api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+            files = {"photo": (filename, file_bytes, f"image/{ext.replace('.', '')}")}
+            data = {
+                "chat_id": TELEGRAM_CHAT_ID,
+                "caption": caption,
+                "parse_mode": "HTML",
+                "reply_markup": json.dumps(reply_markup)
+            }
+            requests.post(api_url, data=data, files=files, timeout=8)
+        else:
+            api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendDocument"
+            files = {"document": (filename, file_bytes, "application/pdf")}
+            data = {
+                "chat_id": TELEGRAM_CHAT_ID,
+                "caption": caption,
+                "parse_mode": "HTML",
+                "reply_markup": json.dumps(reply_markup)
+            }
+            requests.post(api_url, data=data, files=files, timeout=8)
+    except Exception as e:
+        print(f"Telegram notification error: {e}")
 
 @app.post("/api/premium/verify-request")
 async def submit_premium_verification(
@@ -1170,10 +1248,9 @@ async def submit_premium_verification(
     screenshot: UploadFile = File(...)
 ):
     """
-    LOCAL DEMO ONLY:
     Receives ₹499 borrower assistance payment verification request,
     validates form details and screenshot, generates unique CRD-PREM-2026-XXXXX ID,
-    and stores record in isolated local JSON storage.
+    stores record, and sends instant Telegram Alert with 1-Click Approval to Admin.
     """
     if not consent:
         raise HTTPException(status_code=400, detail="Consent for payment verification is required.")
@@ -1235,8 +1312,7 @@ async def submit_premium_verification(
         "agent_assigned": None,
         "has_screenshot": True,
         "screenshot_file": safe_filename,
-        "screenshot_size_bytes": len(content),
-        "is_demo_record": True
+        "screenshot_size_bytes": len(content)
     }
 
     # Save to isolated JSON file
@@ -1244,12 +1320,139 @@ async def submit_premium_verification(
     with open(record_file, "w", encoding="utf-8") as f:
         json.dump(record, f, indent=2, ensure_ascii=False)
 
+    # Send Instant Real-Time Alert to Admin's Telegram Phone
+    send_telegram_payment_alert(record, content, screenshot.filename or safe_filename)
+
     return {
         "status": "success",
         "message": "Your payment verification request has been submitted successfully.",
         "reference_id": ref_id,
         "data": record
     }
+
+@app.get("/api/premium/admin-action")
+def handle_admin_action(
+    ref: str = Query(..., description="Reference ID"),
+    action: str = Query(..., description="approve or reject"),
+    secret: str = Query(..., description="Admin Secret Key")
+):
+    """
+    1-Click Admin Approval / Rejection Endpoint triggered directly from Telegram.
+    Updates the customer's live record immediately.
+    """
+    from fastapi.responses import HTMLResponse
+
+    if secret != TELEGRAM_ADMIN_SECRET:
+        return HTMLResponse(
+            "<html><body style='font-family:sans-serif;background:#0F172A;color:#EF4444;padding:40px;text-align:center;'>"
+            "<h2>❌ Unauthorized: Invalid Admin Secret Key</h2></body></html>",
+            status_code=403
+        )
+
+    clean_ref = ref.strip().upper()
+    record_file = os.path.join(PREMIUM_DATA_DIR, f"{clean_ref}.json")
+    if not os.path.exists(record_file):
+        return HTMLResponse(
+            f"<html><body style='font-family:sans-serif;background:#0F172A;color:#F59E0B;padding:40px;text-align:center;'>"
+            f"<h2>⚠️ Reference ID Not Found: {clean_ref}</h2></body></html>",
+            status_code=404
+        )
+
+    with open(record_file, "r", encoding="utf-8") as f:
+        record = json.load(f)
+
+    applicant_name = record.get("full_name", "Applicant")
+
+    if action.lower() == "approve":
+        record["status"] = "Payment Verified"
+        record["workflow_step"] = "Agent Assigned"
+        record["status_explanation"] = "Congratulations! Your ₹499 payment has been verified by the Credofy team. A personal borrower assistance counselor has been assigned and will contact you within 48 hours."
+        record["agent_assigned"] = "Kunal (Lead Borrower Counselor)"
+        status_color = "#10B981"
+        action_text = "APPROVED & VERIFIED"
+        message_detail = f"Payment for <b>{applicant_name}</b> has been approved! Customer's live status is now green and counselor assigned."
+    else:
+        record["status"] = "Payment Rejected"
+        record["workflow_step"] = "Payment Verification Failed"
+        record["status_explanation"] = "The UTR or payment screenshot provided could not be verified against banking records. Please re-check or contact support@credofy.ai."
+        record["agent_assigned"] = "None"
+        status_color = "#EF4444"
+        action_text = "REJECTED"
+        message_detail = f"Payment for <b>{applicant_name}</b> has been marked as rejected."
+
+    record["updated_at"] = datetime.now().isoformat()
+
+    # Save updated record
+    with open(record_file, "w", encoding="utf-8") as f:
+        json.dump(record, f, indent=2, ensure_ascii=False)
+
+    # Ping Telegram with confirmation
+    try:
+        conf_msg = f"🔔 <b>STATUS UPDATE:</b> Reference <code>{clean_ref}</code> ({applicant_name}) was marked as <b>{action_text}</b> by Admin."
+        requests.post(
+            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+            data={"chat_id": TELEGRAM_CHAT_ID, "text": conf_msg, "parse_mode": "HTML"},
+            timeout=5
+        )
+    except Exception:
+        pass
+
+    return HTMLResponse(f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      <title>Credofy Admin Action — {action_text}</title>
+      <style>
+        body {{
+          background: #070B14;
+          color: #F8FAFC;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          margin: 0;
+          padding: 20px;
+          box-sizing: border-box;
+        }}
+        .card {{
+          background: #0F1626;
+          border: 1px solid #1E293B;
+          border-radius: 24px;
+          padding: 36px 28px;
+          max-width: 460px;
+          width: 100%;
+          text-align: center;
+          box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }}
+        .badge {{
+          display: inline-block;
+          background: {status_color}20;
+          border: 1px solid {status_color}50;
+          color: {status_color};
+          font-weight: 800;
+          font-size: 14px;
+          padding: 6px 16px;
+          border-radius: 999px;
+          margin-bottom: 20px;
+        }}
+        h2 {{ margin: 0 0 10px 0; font-size: 20px; line-height: 1.4; }}
+        p {{ color: #94A3B8; font-size: 13px; line-height: 1.5; }}
+        .ref {{ font-family: monospace; background: #070B14; padding: 6px 12px; border-radius: 8px; color: #F59E0B; font-weight: bold; font-size: 15px; margin: 15px 0; display: inline-block; }}
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="badge">Action: {action_text}</div>
+        <h2>{message_detail}</h2>
+        <div class="ref">{clean_ref}</div>
+        <p>The customer's dashboard on Credofy has been updated in real-time. You can close this window now.</p>
+      </div>
+    </body>
+    </html>
+    """)
 
 @app.get("/api/premium/status/{reference_id}")
 def get_premium_request_status(reference_id: str):
