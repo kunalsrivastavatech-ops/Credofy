@@ -17,6 +17,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.6.2",
     "postcss": "^8.5.32",
+    "puppeteer-core": "^25.16.0",
     "tailwindcss": "^4.3.4",
     "vite": "^6.0.1"
   }

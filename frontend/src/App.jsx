@@ -10,6 +10,7 @@ import {
   Volume2, VolumeX, Mic, MicOff, Share2, Phone, Printer, QrCode, Scale,
   PiggyBank, Wallet, Flame, ShieldAlert, BookOpen, Shield, Layers, Gavel, Zap, FileSpreadsheet, Compass
 } from 'lucide-react';
+import CredofyPremiumAssistance from './CredofyPremiumAssistance';
 
 const API_BASE = "/api";
 const GOOGLE_CLIENT_ID = "908185147077-c1e9lks8dsh4ct0n7rcfe9mpinrso8k4.apps.googleusercontent.com";
@@ -2228,13 +2229,13 @@ export default function App() {
     );
   };
 
-  // Top Dual-Mode Switcher: Credit & Loans vs Bharat Schemes & Regulations
+  // Top Dual-Mode Switcher: Credit & Loans vs Bharat Schemes & Regulations vs Premium Assistance
   const renderTopModeSwitch = () => (
     <div className="flex items-center p-1 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-inner">
       <button
         onClick={() => setStage('loan_purpose')}
         className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
-          stage !== 'government_portal' && stage !== 'pocket_finance'
+          stage !== 'government_portal' && stage !== 'pocket_finance' && stage !== 'premium_assistance'
             ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md font-black'
             : 'text-slate-400 hover:text-white'
         }`}
@@ -2252,9 +2253,22 @@ export default function App() {
         }`}
       >
         <Landmark className="w-3.5 h-3.5 text-amber-400" />
-        <span className="hidden sm:inline">{isHi ? "🏛️ भारत योजना व नियामक कोष" : "🏛️ Bharat Schemes & Regulations"}</span>
+        <span className="hidden sm:inline">{isHi ? "🏛️ भारत योजनाएं" : "🏛️ Bharat Schemes"}</span>
         <span className="sm:hidden">{isHi ? "योजनाएं" : "Schemes"}</span>
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+      </button>
+      <button
+        onClick={() => setStage('premium_assistance')}
+        className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
+          stage === 'premium_assistance'
+            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md font-black'
+            : 'text-amber-400 hover:text-amber-300'
+        }`}
+      >
+        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+        <span className="hidden sm:inline">⭐ {isHi ? "प्रीमियम सहायता (₹499)" : "Premium Assistance (₹499)"}</span>
+        <span className="sm:hidden">⭐ {isHi ? "प्रीमियम" : "Premium"}</span>
+        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
       </button>
     </div>
   );
@@ -2329,7 +2343,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="pt-2 pb-1 border-b border-slate-800">
+          <div className="pt-2 pb-1 border-b border-slate-800 space-y-2">
             <button
               onClick={() => {
                 setProfileDropdownOpen(false);
@@ -2339,6 +2353,17 @@ export default function App() {
             >
               {stage === 'government_portal' || stage === 'pocket_finance' ? <CreditCard className="w-3.5 h-3.5" /> : <Landmark className="w-3.5 h-3.5 text-amber-400" />}
               <span>{stage === 'government_portal' || stage === 'pocket_finance' ? (isHi ? "ऋण मूल्यांकन पर जाएं" : "Switch to Credit & Loans") : (isHi ? "🏛️ भारत योजना व नियामक कोष" : "🏛️ Bharat Schemes & Regulations")}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setProfileDropdownOpen(false);
+                setStage('premium_assistance');
+              }}
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 font-bold text-xs flex items-center justify-center gap-2 transition"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>⭐ {isHi ? "क्रेडोफाई प्रीमियम (₹499)" : "Credofy Premium (₹499)"}</span>
             </button>
           </div>
 
@@ -4183,6 +4208,18 @@ export default function App() {
         {renderFooter()}
         {renderCommonOverlays()}
       </div>
+    );
+  }
+
+  // ================= STAGE 8: CREDOFY PREMIUM BORROWER ASSISTANCE =================
+  if (stage === 'premium_assistance') {
+    return (
+      <CredofyPremiumAssistance
+        user={user}
+        onBack={() => setStage('loan_purpose')}
+        isHi={isHi}
+        apiBase={API_BASE}
+      />
     );
   }
 

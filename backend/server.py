@@ -1151,6 +1151,148 @@ def evaluate_conquer_readiness(payload: ConquerReadinessPayload):
     }
 
 
+# ================= CREDOFY PREMIUM BORROWER ASSISTANCE (LOCAL DEMO ONLY) =================
+import secrets
+import re
+
+PREMIUM_DATA_DIR = os.path.join(BASE_DIR, "data", "premium_requests")
+PREMIUM_UPLOADS_DIR = os.path.join(PREMIUM_DATA_DIR, "uploads")
+os.makedirs(PREMIUM_UPLOADS_DIR, exist_ok=True)
+
+@app.post("/api/premium/verify-request")
+async def submit_premium_verification(
+    full_name: str = Form(...),
+    email: str = Form(...),
+    mobile: str = Form(...),
+    utr_number: str = Form(...),
+    rejection_notes: Optional[str] = Form(None),
+    consent: bool = Form(...),
+    screenshot: UploadFile = File(...)
+):
+    """
+    LOCAL DEMO ONLY:
+    Receives ₹499 borrower assistance payment verification request,
+    validates form details and screenshot, generates unique CRD-PREM-2026-XXXXX ID,
+    and stores record in isolated local JSON storage.
+    """
+    if not consent:
+        raise HTTPException(status_code=400, detail="Consent for payment verification is required.")
+
+    clean_name = full_name.strip()
+    if len(clean_name) < 2:
+        raise HTTPException(status_code=400, detail="Please enter a valid full name.")
+
+    clean_email = email.strip().lower()
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", clean_email):
+        raise HTTPException(status_code=400, detail="Please enter a valid email address.")
+
+    clean_mobile = re.sub(r"\D", "", mobile)
+    if len(clean_mobile) != 10:
+        raise HTTPException(status_code=400, detail="Mobile number must be exactly 10 digits.")
+
+    clean_utr = utr_number.strip().upper()
+    if len(clean_utr) < 6 or len(clean_utr) > 24:
+        raise HTTPException(status_code=400, detail="Please enter a valid UPI / Bank UTR Transaction Reference number.")
+
+    # Validate screenshot file extension
+    ext = os.path.splitext(screenshot.filename or "")[1].lower()
+    allowed_exts = [".jpg", ".jpeg", ".png", ".pdf"]
+    if ext not in allowed_exts:
+        raise HTTPException(status_code=400, detail=f"Unsupported file format '{ext}'. Allowed: JPG, JPEG, PNG, PDF.")
+
+    # Read and validate file size (max 5MB)
+    content = await screenshot.read()
+    if len(content) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File size exceeds the 5MB limit.")
+    if len(content) == 0:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    # Generate unique Reference ID: CRD-PREM-2026-XXXXX
+    ref_suffix = secrets.token_hex(3).upper()
+    ref_id = f"CRD-PREM-2026-{ref_suffix}"
+
+    # Save screenshot safely in isolated local uploads dir
+    safe_filename = f"{ref_id}_{int(time.time())}{ext}"
+    saved_file_path = os.path.join(PREMIUM_UPLOADS_DIR, safe_filename)
+    with open(saved_file_path, "wb") as f:
+        f.write(content)
+
+    now_iso = datetime.now().isoformat()
+    record = {
+        "reference_id": ref_id,
+        "created_at": now_iso,
+        "full_name": clean_name,
+        "email": clean_email,
+        "mobile": clean_mobile,
+        "utr_number": clean_utr,
+        "rejection_notes": (rejection_notes or "").strip(),
+        "amount": 499,
+        "currency": "INR",
+        "service_name": "Credofy Premium Borrower Assistance",
+        "status": "Pending Verification",
+        "workflow_step": "Under Verification",
+        "status_explanation": "Your payment verification request has been submitted successfully and is awaiting manual verification by the Credofy team.",
+        "agent_assigned": None,
+        "has_screenshot": True,
+        "screenshot_file": safe_filename,
+        "screenshot_size_bytes": len(content),
+        "is_demo_record": True
+    }
+
+    # Save to isolated JSON file
+    record_file = os.path.join(PREMIUM_DATA_DIR, f"{ref_id}.json")
+    with open(record_file, "w", encoding="utf-8") as f:
+        json.dump(record, f, indent=2, ensure_ascii=False)
+
+    return {
+        "status": "success",
+        "message": "Your payment verification request has been submitted successfully.",
+        "reference_id": ref_id,
+        "data": record
+    }
+
+@app.get("/api/premium/status/{reference_id}")
+def get_premium_request_status(reference_id: str):
+    """
+    LOCAL DEMO ONLY: Fetches the verification & agent status for a given reference ID.
+    """
+    clean_ref = reference_id.strip().upper()
+    record_file = os.path.join(PREMIUM_DATA_DIR, f"{clean_ref}.json")
+    if not os.path.exists(record_file):
+        raise HTTPException(status_code=404, detail="Reference ID not found.")
+
+    with open(record_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return {"status": "success", "data": data}
+
+@app.get("/api/premium/my-requests")
+def get_my_premium_requests(identifier: str = Query(..., description="Mobile number or email")):
+    """
+    LOCAL DEMO ONLY: Returns all premium requests matching customer's email or mobile number.
+    """
+    clean_id = identifier.strip().lower()
+    clean_mobile = re.sub(r"\D", "", clean_id)
+    results = []
+
+    if os.path.exists(PREMIUM_DATA_DIR):
+        for fname in os.listdir(PREMIUM_DATA_DIR):
+            if fname.endswith(".json") and fname.startswith("CRD-PREM-"):
+                try:
+                    with open(os.path.join(PREMIUM_DATA_DIR, fname), "r", encoding="utf-8") as f:
+                        req = json.load(f)
+                        req_email = req.get("email", "").lower()
+                        req_mobile = req.get("mobile", "")
+                        if (clean_id and clean_id == req_email) or (clean_mobile and clean_mobile == req_mobile):
+                            results.append(req)
+                except Exception:
+                    pass
+
+    # Sort newest first
+    results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    return {"status": "success", "count": len(results), "requests": results}
+
+
+
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
