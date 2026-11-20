@@ -151,22 +151,74 @@ bank_leads_col = CollectionProxy("bank_leads")
 # ================= FIREBASE CLOUD FIRESTORE INTEGRATION =================
 import firebase_admin
 from firebase_admin import credentials, firestore
+import base64
 
 FIREBASE_CREDS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "firebase_credentials.json")
 firebase_db = None
 firebase_status = "Not Initialized"
 
-try:
-    if os.path.exists(FIREBASE_CREDS_PATH):
-        if not firebase_admin._apps:
-            cred = credentials.Certificate(FIREBASE_CREDS_PATH)
-            firebase_admin.initialize_app(cred)
-        firebase_db = firestore.client()
-        firebase_status = "Connected (credofy-51744)"
-        print("✓ Firebase Cloud Firestore initialized for project 'credofy-51744'.")
-except Exception as e:
-    firebase_status = f"Pending Activation: {e}"
-    print("Firebase init notice:", e)
+# Embedded Base64 Service Account for Cloud Deployments (e.g. Render)
+EMBEDDED_FIREBASE_B64 = (
+    "eyJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsICJwcm9qZWN0X2lkIjogImNyZWRvZnktNTE3NDQiLCAicHJpdmF0ZV9rZXlfaWQiOiAiZmVmNWU5NGY5NDFlZDhlZWQzNzE3NDc2ZWFhNzY3Y2M4NTMyZjVhZiIsICJwcml2YXRlX2tleSI6ICItLS0tLUJFR0lOIFBSSVZBVEUgS0VZLS0tLS1cbk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRQ2x2VEpuRGJZQlZWL0xcblFTdnN1VHhNR1lsd3o1dTRTaWpFNk1KR2o5WDdjSmF5UWcyKzF0enN5KzRsZDBqSmtnSStLRmFCZURJeFZybHpcbmNCbng3NjZBQlFCVHlMZThtempOOVp6Ym5DcjB3aEpNR0tURjQ4ZHRsQnZPaGJZaGxXeWdPM3BDSXcvQzhFZmxcbkFOTmxKUktoenpQNE9XemtYdnlYdEluV0E3dEJIOExCZTU2eXFuTTN0amhyU09aZkV1TURlVVRDZ1oranZDYXNcbm53RUhPR1NlSEhNMHY2dHV6NU45WWN1SW5FdTFCVWg5MnJKOXo3eHJDQnFyNkpNNGlOWU5rajRqaFZUdU1MN0xcbmJ4WG9wdXk0QWVKRFZLWlpJMjEyMFBkMm1LaW9ONFNmalpGNjMrZHlUektqdUkvYlY1T1JvMjdZVzNQSTBHNVZcbmY4cEExSlVQQWdNQkFBRUNnZ0VBR3RzbS9TcnNHSmc0Ynd1TzdndHYrVmJUL2dzdURQVTdXUGpzYmhtbGoxcEZcbm1QbjZGemZpMFo0VDUwOUdaSjg3ck0zRmdySXkwK3JkSHhjRnBUMzAxVHE2UEZsVWFJUHdkdk03S1J6TG15Q05cbmJYWTYwUFFoWHlDMlJzZEU1WGs4Z2xSUThjR1RycjlYcndSc3ZNRituT2loMzdHU2N3anZQamZiYytuajRGL2RcbjMzeFpWb1BIK0ROblk2YnlkcEJGK0ZMMHhuZVdOT0VWTjY3UWhybG9LcFlndzNwbDNVL0U1eklSMGJUMWdQTjhcbjRYNFpVRmk0WDQ5N3d4WHpRaVZmWk0vanZwL2JzNW9mRUxNWGk1NXh6blRCRHBxQ2NMbTFjU1dnRkhpUnNUcVhcbnBqOW1GSnF1Q05rOUN2RlN6Rzl5NXpZMzkvdnU1U3l0YTF2UWd1S2RxUUtCZ1FEUnJjMW90Vy94bWpFdHlSbC9cbmtwM0RIUzBabGNLSVFSdjlpbU1DU0dGUHFMUzdDVURaS05BMXF5cndQQmhuQkRmMUFwVkpxOHdhM254aEtZMzNcbmUzbnZoY0pZUldCL25kalN5Zk5wUUsyYkFnaVZFWGtncVQ1TUlBYW9VL29VSHpENk9EN3ppNnJxZ0VIaFh1c2pcblpEV3E3aWdXNXRWRk5NR0hFYWxQMHFTbnlRS0JnUURLV21wODEzeWVlS25zSmo2N0J0L0lqeDRvcUZIMythVi9cbmVpWjhxbE82U0NUWjhORG9lNHdQT1BINHdCK3RXQlB6VHdrNFRxSGx5YnRXNWtWS01oU2M0V0tvVXNIT3U5TzBcbmluUDNhdXlYdXhoVGovUzhsWTRUeUZTcDJKV2grc1FDWmVJMnRic0hpaWgyejNlQWdQWkVoRnQxVE9jT3BZV05cbnhMUytnOEp5RndLQmdRQ0YrbHhLRDhVYng3NnMxdGFvSVhNVS9VdVlFWTFmcXRyTHd1Vkl6QjhCMjNiQUhFV0hcbmZRQ3RpbFhCYzJUVVRtbkM4SWVicjE2WHZKb1ZLNHcvR25McmpiaUUxcSsyVzVIei9uNitQa212eGpqZHAzQ1NcblloSWdha1pXd0hJRzhYZEdLekp1UkV4TjB1NUZwM1R3QkZRV2lGNnRZNG5hMHI3bUkyN2dSbVJYb1FLQmdEeFhcblgvL2dabG4vVTNTSEp4ZXdnaFVWa0lIQlI4Z3htc2Q3em5SSWVuVkhSQzMxWU9haXlPNVZKZHJ1dDhPQ1MxaTNcbnplRUxtYjJqUFlrNVc1bzNldXdaVGNreC9IZEFqVzMrQjN6VlZyNGNYYkcxY042M25rbUo2SzFKVjcyWXdOQ1NcblB6WGZWV2wzS24vYmVDQksxS1V6N3UzNHc4SWJXOHNkeUdRemVFMTdBb0dCQUp5S29ZSTFQQncwUzFnWDdkS2Jcbmt5bFp5TmhraGprWUpscmsrblA1cFdOL0VTallNUVhJUFNIY3J3dmYvQStjS2NSTVEzWkRiYXNCWnFNN1pyL0hcbjNNTmJoaXNob3YvRXJTTi9mcU4rMzgvYWQzNUdUbTUwOEZKeXFrN0w0WjQ2L0xoYWFqSlVZOGJhN1FKQlhId3dcbk5pSUpSZlpwSFBiWk1adWc3SG9BcnRtR1xuLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLVxuIiwgImNsaWVudF9lbWFpbCI6ICJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BjcmVkb2Z5LTUxNzQ0LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwgImNsaWVudF9pZCI6ICIxMTc2ODU4NjY0NzAyNDcxNjM3MjEiLCAiYXV0aF91cmkiOiAiaHR0cHM6Ly9hY2NvdW50cy5nb29nbGUuY29tL28vb2F1dGgyL2F1dGgiLCAidG9rZW5fdXJpIjogImh0dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29tL3Rva2VuIiwgImF1dGhfcHJvdmlkZXJfeDUwOV9jZXJ0X3VybCI6ICJodHRwczovL3d3dy5nb29nbGVhcGlzLmNvbS9vYXV0aDIvdjEvY2VydHMiLCAiY2xpZW50X3g1MDlfY2VydF91cmwiOiAiaHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vcm9ib3QvdjEvbWV0YWRhdGEveDUwOS9maXJlYmFzZS1hZG1pbnNkay1mYnN2YyU0MGNyZWRvZnktNTE3NDQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCAidW5pdmVyc2VfZG9tYWluIjogImdvb2dsZWFwaXMuY29tIn0="
+)
+
+def init_firebase_admin():
+    global firebase_db, firebase_status
+    cred_obj = None
+
+    # Priority 1: Environment variable FIREBASE_CREDENTIALS_JSON
+    env_json = os.environ.get("FIREBASE_CREDENTIALS_JSON")
+    if env_json:
+        try:
+            cred_dict = json.loads(env_json)
+            cred_obj = credentials.Certificate(cred_dict)
+            print("✓ Loaded Firebase credentials from FIREBASE_CREDENTIALS_JSON.")
+        except Exception as e:
+            print("Notice: Could not parse FIREBASE_CREDENTIALS_JSON:", e)
+
+    # Priority 2: Environment variable FIREBASE_CREDENTIALS_BASE64
+    if not cred_obj:
+        env_b64 = os.environ.get("FIREBASE_CREDENTIALS_BASE64")
+        if env_b64:
+            try:
+                cred_dict = json.loads(base64.b64decode(env_b64).decode("utf-8"))
+                cred_obj = credentials.Certificate(cred_dict)
+                print("✓ Loaded Firebase credentials from FIREBASE_CREDENTIALS_BASE64.")
+            except Exception as e:
+                print("Notice: Could not decode FIREBASE_CREDENTIALS_BASE64:", e)
+
+    # Priority 3: Local file on disk (development)
+    if not cred_obj and os.path.exists(FIREBASE_CREDS_PATH):
+        try:
+            cred_obj = credentials.Certificate(FIREBASE_CREDS_PATH)
+            print("✓ Loaded Firebase credentials from local file.")
+        except Exception as e:
+            print("Notice: Could not read FIREBASE_CREDS_PATH:", e)
+
+    # Priority 4: Embedded Base64 fallback (guarantees Render cloud connectivity)
+    if not cred_obj and EMBEDDED_FIREBASE_B64:
+        try:
+            cred_dict = json.loads(base64.b64decode(EMBEDDED_FIREBASE_B64).decode("utf-8"))
+            cred_obj = credentials.Certificate(cred_dict)
+            print("✓ Loaded Firebase credentials from Cloud Embedded profile.")
+        except Exception as e:
+            print("Notice: Could not decode EMBEDDED_FIREBASE_B64:", e)
+
+    if cred_obj:
+        try:
+            if not firebase_admin._apps:
+                firebase_admin.initialize_app(cred_obj)
+            firebase_db = firestore.client()
+            firebase_status = "Connected (credofy-51744)"
+            print("✓ Firebase Cloud Firestore initialized for project 'credofy-51744'.")
+        except Exception as e:
+            firebase_status = f"Pending Activation: {e}"
+            print("Firebase init error:", e)
+    else:
+        firebase_status = "Credentials Missing"
+        print("Firebase init: No credentials available.")
+
+init_firebase_admin()
 
 def sync_user_to_firestore(user_doc: dict):
     """
