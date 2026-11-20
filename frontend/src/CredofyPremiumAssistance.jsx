@@ -285,10 +285,12 @@ export default function CredofyPremiumAssistance({
   return (
     <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
       
-      {/* 1. VISIBLE INTERNAL DEVELOPMENT DEMO WATERMARK */}
-      <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 text-center flex items-center justify-center gap-2 text-xs font-mono font-bold text-amber-400">
-        <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-        <span>DEMO ENVIRONMENT – NOT LIVE (LOCAL TESTING ONLY)</span>
+      {/* 1. OFFICIAL LIVE STATUS HEADER BAR */}
+      <div className="bg-gradient-to-r from-emerald-500/15 via-slate-900 to-emerald-500/15 border-b border-emerald-500/30 px-4 py-2 text-center flex items-center justify-center gap-2 text-xs font-semibold text-emerald-400">
+        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="font-bold tracking-wide">LIVE ADVISORY DESK</span>
+        <span className="text-slate-600 hidden sm:inline">•</span>
+        <span className="hidden sm:inline text-slate-300">48-Hour Counselor Assignment Active &amp; Verified</span>
       </div>
 
       {/* 2. TOP HEADER NAVIGATION */}
@@ -335,9 +337,10 @@ export default function CredofyPremiumAssistance({
 
             <button
               onClick={() => paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-xs font-black bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 px-4 py-2 rounded-xl shadow-lg shadow-amber-500/20 transition transform active:scale-95 flex items-center gap-1.5"
+              className="text-xs font-black bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 px-3 sm:px-4 py-2 rounded-xl shadow-lg shadow-amber-500/20 transition transform active:scale-95 flex items-center gap-1.5 flex-shrink-0"
             >
-              <span>Get Started – ₹499</span>
+              <span className="hidden sm:inline">Get Started – ₹499</span>
+              <span className="sm:hidden">Pay ₹499</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -619,55 +622,40 @@ export default function CredofyPremiumAssistance({
                 <li>Fill and submit the verification form on the right.</li>
               </ol>
 
-              {/* DEDICATED QR IMAGE PLACEHOLDER */}
-              <div className="relative border-2 border-dashed border-amber-500/40 rounded-2xl p-6 bg-slate-900/80 text-center flex flex-col items-center justify-center overflow-hidden min-h-[280px]">
+              {/* OFFICIAL UPI PAYMENT QR CODE CARD */}
+              <div className="relative border-2 border-amber-500/40 rounded-3xl p-5 bg-[#0A0F1D] text-center flex flex-col items-center justify-center overflow-hidden shadow-2xl">
                 
-                {customQrImage ? (
-                  <div className="relative w-full flex flex-col items-center">
-                    <img src={customQrImage} alt="Credofy UPI QR Code" className="w-48 h-48 object-contain rounded-xl mb-3 shadow-lg" />
-                    <button
-                      onClick={() => setCustomQrImage(null)}
-                      className="text-[10px] text-red-400 hover:underline"
-                    >
-                      Reset to Official Placeholder
-                    </button>
+                <div className="bg-white p-3.5 rounded-2xl shadow-2xl border border-slate-200/20 max-w-[260px] sm:max-w-[280px] w-full flex flex-col items-center">
+                  <div className="flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-slate-800 mb-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Official UPI Payment QR</span>
                   </div>
-                ) : (
-                  <>
-                    <div className="w-20 h-20 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4 shadow-inner">
-                      <QrCode className="w-10 h-10" />
-                    </div>
 
-                    <div className="font-bold text-white text-sm mb-1">
-                      Official payment QR will be available here.
-                    </div>
-                    
-                    <p className="text-[11px] text-slate-400 max-w-xs mb-4">
-                      UPI ID: Configured during launch. Scan with any UPI app (Google Pay, PhonePe, Paytm, BHIM).
-                    </p>
+                  <div className="relative p-1 bg-white rounded-xl">
+                    <img 
+                      src="/credofy_payment_qr.jpg" 
+                      alt="Credofy Official UPI Payment QR Code" 
+                      className="w-52 h-52 sm:w-60 sm:h-60 object-contain rounded-lg"
+                    />
+                  </div>
 
-                    <label className="cursor-pointer text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-xl border border-amber-500/30 transition">
-                      <span>Drop Custom QR to Preview</span>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) {
-                            const r = new FileReader();
-                            r.onload = () => setCustomQrImage(r.result);
-                            r.readAsDataURL(f);
-                          }
-                        }}
-                      />
-                    </label>
-                  </>
-                )}
+                  <div className="mt-3 w-full py-2 px-3 rounded-xl bg-slate-900 text-amber-400 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-md">
+                    <span>Pay Exactly ₹499</span>
+                  </div>
+                </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-800/80 w-full text-[10px] text-slate-400 flex items-center justify-center gap-1.5 font-mono">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Manual Operations Verification</span>
+                {/* Supported Apps Badges */}
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5 text-[10px] text-slate-300 font-medium max-w-xs">
+                  <span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800">Google Pay</span>
+                  <span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800">PhonePe</span>
+                  <span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800">Paytm</span>
+                  <span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800">BHIM UPI</span>
+                  <span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800">Any Bank App</span>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-800/80 w-full text-[11px] text-slate-400 flex items-center justify-center gap-1.5 font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <span>256-Bit SSL Encrypted Verification Desk</span>
                 </div>
               </div>
 
